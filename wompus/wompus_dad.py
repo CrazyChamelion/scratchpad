@@ -30,7 +30,6 @@ def get_random_no_overlap_points():
 
 
 unique_pts = get_random_no_overlap_points()
-print(unique_pts)  # for debug, remove
 wompus_x = unique_pts[0][0]
 wompus_y = unique_pts[0][1]
 bow_x = unique_pts[1][0]
@@ -39,9 +38,6 @@ pit1_x = unique_pts[2][0]
 pit1_y = unique_pts[2][1]
 pit2_x = unique_pts[3][0]
 pit2_y = unique_pts[3][1]
-
-bow_x = 1
-bow_y = 1
 
 havebow = False
 dead_wompus = False
@@ -73,7 +69,7 @@ def death_check():
         print("you are next to the pit")
 
 
-print("you are in the top left corner of the map")
+print(x,y)
 
 
 def bow_check():
