@@ -1,8 +1,11 @@
+
+# requirements by Sigmund
+# implementation by Dad
 """ REQUIRMENTS
 1 Dynamic divisibility rules eg one time /3 = fiz another time /5 = fiz 
 2 pattern dettion, after 3 fizz say mega fizz, after 3 buzz say mega buzz, ect
 3 Grid formating
-4 #opptional, prime detection
+4 prime detection
 """
 
 def sieve_of_eratosthenes(max):
