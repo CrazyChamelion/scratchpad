@@ -72,6 +72,65 @@ class Piece():
             
         path += ".png"
         self.sprite = init_sprite(arcade.Sprite(path), self.cord)
+    def get_moves(self):
+        result = []
+        if self.type == Type.ROOK:
+            print ("a rook was clicked")
+            for a in range (10):
+                result.append(Coordinate(self.cord.i +a , self.cord.j))
+                result.append(Coordinate(self.cord.i -a , self.cord.j))
+                result.append(Coordinate(self.cord.i  , self.cord.j+a))
+                result.append(Coordinate(self.cord.i  , self.cord.j-a))
+        elif self.type == Type.BISHOP: 
+            print ("a bishop was clicked")
+            for a in range (10):
+                result.append(Coordinate(self.cord.i +a , self.cord.j+a))
+                result.append(Coordinate(self.cord.i -a , self.cord.j-a))
+                result.append(Coordinate(self.cord.i -a , self.cord.j+a))
+                result.append(Coordinate(self.cord.i +a , self.cord.j-a))
+        elif self.type == Type.KNIGHT: 
+            print ("a knight was clicked")
+            result.append(Coordinate(self.cord.i +2 , self.cord.j+1))
+            result.append(Coordinate(self.cord.i +2 , self.cord.j-1))
+            result.append(Coordinate(self.cord.i +1 , self.cord.j+2))
+            result.append(Coordinate(self.cord.i +1 , self.cord.j-2))
+            result.append(Coordinate(self.cord.i -2 , self.cord.j+1))
+            result.append(Coordinate(self.cord.i -2 , self.cord.j-1))
+            result.append(Coordinate(self.cord.i -1 , self.cord.j+2))
+            result.append(Coordinate(self.cord.i -1 , self.cord.j-2))
+        elif self.type == Type.KING:
+            print ("a king was clicked")
+            result.append(Coordinate(self.cord.i +1 , self.cord.j+1))
+            result.append(Coordinate(self.cord.i -1 , self.cord.j-1))
+            result.append(Coordinate(self.cord.i +1 , self.cord.j-1))
+            result.append(Coordinate(self.cord.i -1 , self.cord.j+1))
+            result.append(Coordinate(self.cord.i , self.cord.j+1))
+            result.append(Coordinate(self.cord.i , self.cord.j-1))
+            result.append(Coordinate(self.cord.i +1 , self.cord.j))
+            result.append(Coordinate(self.cord.i -1 , self.cord.j))
+        elif self.type == Type.QUEEN:
+            print ("a queen was clicked")
+            for a in range (10):
+                result.append(Coordinate(self.cord.i +a , self.cord.j))
+                result.append(Coordinate(self.cord.i -a , self.cord.j))
+                result.append(Coordinate(self.cord.i  , self.cord.j+a))
+                result.append(Coordinate(self.cord.i  , self.cord.j-a)) 
+                result.append(Coordinate(self.cord.i +a , self.cord.j+a))
+                result.append(Coordinate(self.cord.i -a , self.cord.j-a))
+                result.append(Coordinate(self.cord.i -a , self.cord.j+a))
+                result.append(Coordinate(self.cord.i +a , self.cord.j-a))
+        elif self.type == Type.PAWN:
+            if self.dir == Direction.UP:
+                z = +1 
+            else:
+                z = -1               
+            result.append(Coordinate(self.cord.i  , self.cord.j+2* z ))      
+            result.append(Coordinate(self.cord.i  , self.cord.j+ z ))   
+            print ("a pawn was clicked")
+        else:
+            print ("SHIT SHIT SHIT SHIT SHIT ITS FUCKED ITS FUCKED ITS FUCKED")
+            raise Exception("Unknown piece type was cliced")
+        return result
 
 
 class MyGame(arcade.Window):
@@ -83,8 +142,11 @@ class MyGame(arcade.Window):
         arcade.set_background_color(arcade.color.DARK_GREEN)
         self.reset_board()
         self.clicked_on = False
+        
 
     def reset_board(self):
+        self.pos_moves = []
+        self.selected_piece_cord = None
         self.sprite_list = arcade.SpriteList()
         self.pieces = []
         # makes pawns
@@ -150,7 +212,13 @@ class MyGame(arcade.Window):
     def on_draw(self):
         self.clear()
         self.draw_grid()
+        if self.selected_piece_cord: 
+            arcade.draw_rect_filled(arcade.rect.XYWH((self.selected_piece_cord.i + 0.5) *SQUARE , (self.selected_piece_cord.j +0.5) * SQUARE , SQUARE , SQUARE ),arcade.color.RED)
+        for move in self.pos_moves:
+            arcade.draw_rect_filled(arcade.rect.XYWH((move.i + 0.5) *SQUARE , (move.j +0.5) * SQUARE , SQUARE , SQUARE ),arcade.color.RED)
         self.sprite_list.draw()
+        
+
 
     def draw_grid(self):
         y=SQUARE / 2
@@ -168,15 +236,20 @@ class MyGame(arcade.Window):
         return 0
 
     def on_mouse_press(self, x, y, button, key_modifiers):
+        self.pos_moves.clear()
         if button == arcade.MOUSE_BUTTON_LEFT :
             print (x,y)
-            
-    
+            square_click_x = x // SQUARE
+            square_click_y = y // SQUARE 
+            print (square_click_x, square_click_y)
+            for piece in self.pieces:
+                if square_click_x == piece.cord.i and square_click_y == piece.cord.j: 
+                    self.selected_piece_cord = Coordinate(square_click_x, square_click_y)
+                    self.pos_moves = piece.get_moves()
     
 def main():
     window = MyGame()
     arcade.run()
-
 
 if __name__ == "__main__":
     main()
