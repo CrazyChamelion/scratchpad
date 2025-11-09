@@ -13,7 +13,7 @@ class Coordinate:
         self.i = i
         self.j = j
 
-    def ToXY(self ):
+    def toXY(self ):
         return self.i * SQUARE + SQUARE / 2 , self.j * SQUARE + SQUARE / 2
     
 class Direction(Enum):
@@ -35,7 +35,7 @@ class Type(Enum):
 def init_sprite (sprite, cord):
     sprite.width = SQUARE
     sprite.height = SQUARE
-    sprite.center_x , sprite.center_y = cord.ToXY()
+    sprite.center_x , sprite.center_y = cord.toXY()
     return sprite 
 
 class Piece():
@@ -72,6 +72,11 @@ class Piece():
             
         path += ".png"
         self.sprite = init_sprite(arcade.Sprite(path), self.cord)
+
+    def move_to(self, coord):
+        self.cord = coord
+        self.sprite.center_x, self.sprite.center_y = coord.toXY()
+    
     def get_moves(self):
         result = []
         if self.type == Type.ROOK:
@@ -146,7 +151,7 @@ class MyGame(arcade.Window):
 
     def reset_board(self):
         self.pos_moves = []
-        self.selected_piece_cord = None
+        self.selected_piece = None
         self.sprite_list = arcade.SpriteList()
         self.pieces = []
         # makes pawns
@@ -212,8 +217,8 @@ class MyGame(arcade.Window):
     def on_draw(self):
         self.clear()
         self.draw_grid()
-        if self.selected_piece_cord: 
-            arcade.draw_rect_filled(arcade.rect.XYWH((self.selected_piece_cord.i + 0.5) *SQUARE , (self.selected_piece_cord.j +0.5) * SQUARE , SQUARE , SQUARE ),arcade.color.RED)
+        if self.selected_piece: 
+            arcade.draw_rect_filled(arcade.rect.XYWH((self.selected_piece.cord.i + 0.5) *SQUARE , (self.selected_piece.cord.j +0.5) * SQUARE , SQUARE , SQUARE ),arcade.color.RED)
         for move in self.pos_moves:
             arcade.draw_rect_filled(arcade.rect.XYWH((move.i + 0.5) *SQUARE , (move.j +0.5) * SQUARE , SQUARE , SQUARE ),arcade.color.RED)
         self.sprite_list.draw()
@@ -236,16 +241,22 @@ class MyGame(arcade.Window):
         return 0
 
     def on_mouse_press(self, x, y, button, key_modifiers):
-        self.pos_moves.clear()
         if button == arcade.MOUSE_BUTTON_LEFT :
             print (x,y)
             square_click_x = x // SQUARE
             square_click_y = y // SQUARE 
             print (square_click_x, square_click_y)
-            for piece in self.pieces:
-                if square_click_x == piece.cord.i and square_click_y == piece.cord.j: 
-                    self.selected_piece_cord = Coordinate(square_click_x, square_click_y)
-                    self.pos_moves = piece.get_moves()
+            if self.selected_piece:
+                for move in self.pos_moves:
+                    if square_click_x == move.i and square_click_y == move.j:  
+                        self.selected_piece.move_to(Coordinate(square_click_x, square_click_y))
+                        self.pos_moves.clear()
+                        self.selected_piece = None
+            else:
+                for piece in self.pieces:
+                    if square_click_x == piece.cord.i and square_click_y == piece.cord.j: 
+                            self.selected_piece = piece
+                            self.pos_moves = piece.get_moves()
     
 def main():
     window = MyGame()
