@@ -1,11 +1,9 @@
 import arcade
-from enum import Enum
 import math
+import random
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 1000
 
-class Type(Enum):
-    BACK = 1
 
 class MyGame(arcade.Window):
     def __init__(self, ):
@@ -14,15 +12,15 @@ class MyGame(arcade.Window):
         self.turn_rate = 5
         self.bullet_speed = 20
         path = "./assets/07.jpg.webp"
-        self.backround = arcade.Sprite(path,3.4,500,500)
+        self.backround = arcade.Sprite(path,3.4,SCREEN_WIDTH/2, SCREEN_HEIGHT/2)
         self.listtomakethebackround = arcade.SpriteList()
         self.listtomakethebackround.append (self.backround) 
         path = "./assets/blue_ship.png"
         self.sprite_list = arcade.SpriteList()
-        self.blue_ship = arcade.Sprite(path, 0.5 , 500, 500) 
+        self.blue_ship = arcade.Sprite(path, 0.5 ,random.randint(50, SCREEN_WIDTH-50),random.randint(50, SCREEN_HEIGHT-50))
         self.sprite_list.append (self.blue_ship) 
         path = "./assets/red_ship.png"
-        self.red_ship = arcade.Sprite(path, 0.5 , 750, 250) 
+        self.red_ship = arcade.Sprite(path, 0.5 , random.randint(50, SCREEN_WIDTH-50),random.randint(50, SCREEN_HEIGHT-50))
         self.sprite_list.append (self.red_ship) 
         self.bullet_list = arcade.SpriteList ()
 
@@ -94,23 +92,23 @@ class MyGame(arcade.Window):
         return x, y 
 
     def looping (self):
-        if self.blue_ship.center_y >=1000:
+        if self.blue_ship.center_y >=SCREEN_HEIGHT:
             self.blue_ship.center_y = 50
         if self.blue_ship.center_y <=0:
-            self.blue_ship.center_y = 950
+            self.blue_ship.center_y = SCREEN_HEIGHT - 50
         if self.blue_ship.center_x <=0:
-            self.blue_ship.center_x = 950
-        if self.blue_ship.center_x >=1000:
+            self.blue_ship.center_x = SCREEN_WIDTH - 50
+        if self.blue_ship.center_x >=SCREEN_WIDTH:
             self.blue_ship.center_x = 50
 
-        if self.red_ship.center_y >=1000:
+        if self.red_ship.center_y >=SCREEN_HEIGHT:
             self.red_ship.center_y = 50
         if self.red_ship.center_y <=0:
-            self.red_ship.center_y = 950
-        if self.red_ship.center_x >=1000:
+            self.red_ship.center_y = SCREEN_HEIGHT - 50
+        if self.red_ship.center_x >=SCREEN_WIDTH:
             self.red_ship.center_x = 50
         if self.red_ship.center_x <=0:
-            self.red_ship.center_x = 950
+            self.red_ship.center_x = SCREEN_WIDTH - 50
         
         
 
