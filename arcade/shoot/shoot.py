@@ -1,6 +1,8 @@
 import arcade
 import math
 import random
+import sys
+import time
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 1000
 
@@ -8,6 +10,8 @@ SCREEN_HEIGHT = 1000
 class MyGame(arcade.Window):
     def __init__(self, ):
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, "Shooter")
+        self.blue_hp = 3
+        self.red_hp = 3
         self.move_speed = 10
         self.turn_rate = 5
         self.bullet_speed = 20
@@ -22,11 +26,12 @@ class MyGame(arcade.Window):
         path = "./assets/red_ship.png"
         self.red_ship = arcade.Sprite(path, 0.5 , random.randint(50, SCREEN_WIDTH-50),random.randint(50, SCREEN_HEIGHT-50))
         self.sprite_list.append (self.red_ship) 
-        self.bullet_list = arcade.SpriteList ()
+        self.bbullet_list = arcade.SpriteList ()
+        self.rbullet_list = arcade.SpriteList ()
 
         self.physics_engines = [arcade.PhysicsEngineSimple(self.blue_ship), arcade.PhysicsEngineSimple(self.red_ship)]
         
-    def shoot_bullet(self, ship):
+    def shoot_bullet(self, ship,list ):
         velocity_x, velocity_y = self.unit_vec(ship)
         
         path = "./assets/bullet.png"
@@ -35,7 +40,7 @@ class MyGame(arcade.Window):
         bullet.change_x = velocity_x * self.bullet_speed
         bullet.change_y = velocity_y * self.bullet_speed
         self.physics_engines.append(arcade.PhysicsEngineSimple(bullet))
-        self.bullet_list.append (bullet)
+        list.append (bullet)
 
     def on_key_press(self, key, z):
         if key == arcade.key.W:
@@ -54,7 +59,7 @@ class MyGame(arcade.Window):
             self.blue_ship.change_angle = self.turn_rate
 
         if key == arcade.key.CAPSLOCK:
-            self.shoot_bullet(self.blue_ship)
+            self.shoot_bullet(self.blue_ship,self.bbullet_list)
 
         if key == arcade.key.UP:
             vel_x,vel_y = self. unit_vec(self.red_ship)
@@ -71,7 +76,7 @@ class MyGame(arcade.Window):
             self.red_ship.change_angle = self.turn_rate
 
         if key == arcade.key.NUM_0:
-            self.shoot_bullet(self.red_ship)
+            self.shoot_bullet(self.red_ship,self.rbullet_list)
     
     def on_key_release(self, key, z):
         if key == arcade.key.W or key == arcade.key.S:
@@ -83,7 +88,7 @@ class MyGame(arcade.Window):
             self.red_ship.change_x = 0
         if key == arcade.key.A or key == arcade.key.D:
             self.blue_ship.change_angle = 0
-        if key == arcade.key.LEFT or arcade.key.RIGHT:
+        if key == arcade.key.LEFT or key == arcade.key.RIGHT:
             self.red_ship.change_angle = 0
         
     def unit_vec(self, sprite):
@@ -110,19 +115,61 @@ class MyGame(arcade.Window):
         if self.red_ship.center_x <=0:
             self.red_ship.center_x = SCREEN_WIDTH - 50
         
-        
+    
+    def game_end(self):
+        if self.blue_hp <=0:
+            print ("red wins") 
+            sys.exit()
+        if self.red_hp <=0:
+            print ("blue wins") 
+            sys.exit()
+    
+    def draw_health(self):
+        for x in range(self.red_hp):
+            arcade.draw.draw_circle_filled((x + 1)*30, SCREEN_HEIGHT-20, 10, arcade.color.RED)
 
+        for x in range(self.blue_hp):
+            arcade.draw.draw_circle_filled(SCREEN_WIDTH-(x + 1)*30, SCREEN_HEIGHT-20, 10, arcade.color.BLUE)
 
     def on_draw(self):
         
         self.clear()
         self.listtomakethebackround.draw()
         self.sprite_list.draw()
-        self.bullet_list.draw()
+        self.bbullet_list.draw()
+        self.rbullet_list.draw()
+        self.draw_health()
+
     def on_update(self, x):
         for e in self.physics_engines:
             e.update()
         self.looping()
+        self.game_end() 
+        
+        red_bullet_hit_list = arcade.check_for_collision_with_list(self.red_ship, self.bbullet_list) 
+        for rbullet in red_bullet_hit_list: 
+            rbullet.remove_from_sprite_lists()
+            self.red_ship.center_x = random.randint(0,SCREEN_WIDTH) 
+            self.red_ship.center_y = random.randint(0,SCREEN_HEIGHT) 
+            self.blue_ship.center_x = random.randint(0,SCREEN_WIDTH) 
+            self.blue_ship.center_y = random.randint(0,SCREEN_HEIGHT) 
+            self.red_hp -= 1
+            
+           
+            
+        blue_bullet_hit_list = arcade.check_for_collision_with_list(self.blue_ship, self.rbullet_list) 
+        for bbullet in blue_bullet_hit_list: 
+            bbullet.remove_from_sprite_lists()
+            self.blue_ship.center_x = random.randint(0,SCREEN_WIDTH) 
+            self.blue_ship.center_y = random.randint(0,SCREEN_HEIGHT) 
+            self.red_ship.center_x = random.randint(0,SCREEN_WIDTH) 
+            self.red_ship.center_y = random.randint(0,SCREEN_HEIGHT) 
+            self.blue_hp -= 1
+           
+
+  
+        
+
 def main():
     window = MyGame()
     arcade.run()        
