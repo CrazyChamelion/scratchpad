@@ -1,8 +1,7 @@
 import arcade
 import math
 import random
-import sys
-import time
+
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 1000
 
@@ -10,6 +9,11 @@ SCREEN_HEIGHT = 1000
 class MyGame(arcade.Window):
     def __init__(self, ):
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, "Shooter")
+        self.red_wins = 0
+        self.blue_wins = 0
+        self.new_game()
+
+    def new_game(self):
         self.blue_hp = 3
         self.red_hp = 3
         self.move_speed = 10
@@ -119,11 +123,15 @@ class MyGame(arcade.Window):
     def game_end(self):
         if self.blue_hp <=0:
             print ("red wins") 
-            sys.exit()
+            self.red_wins += 1 
+            print (f"red has won {self.red_wins} time(s) blue has won {self.blue_wins} time(s)")
+            self.new_game ()
         if self.red_hp <=0:
             print ("blue wins") 
-            sys.exit()
-    
+            self.blue_wins += 1 
+            print (f"red has won {self.red_wins} time(s) blue has won {self.blue_wins} time(s)")
+            self.new_game ()
+
     def draw_health(self):
         for x in range(self.red_hp):
             arcade.draw.draw_circle_filled((x + 1)*30, SCREEN_HEIGHT-20, 10, arcade.color.RED)
