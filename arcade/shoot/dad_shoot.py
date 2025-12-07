@@ -33,6 +33,7 @@ class Ship():
         self.move_speed = move_speed
         self.turn_rate = turn_rate
         self.bullet_speed = bullet_speed
+        self.hp = 3
     
     def shoot(self):
         velocity_x, velocity_y = unit_vec(self.sprite)
@@ -74,8 +75,13 @@ class Ship():
         for b in self.bullet_list:
             do_physics(b, dt)
 
-    def get_collisions(self, bullets):
-        return arcade.check_for_collision_with_list(self.sprite, bullets) 
+    def collisions_exist(self, bullets):
+        return len(arcade.check_for_collision_with_list(self.sprite, bullets)) > 0
+    
+    def reset_on_hit(self):
+        self.sprite.center_x = random.randint(0,SCREEN_WIDTH) 
+        self.sprite.center_y = random.randint(0,SCREEN_HEIGHT) 
+        self.bullet_list.clear()
     
     def looping(self):
         if self.sprite.center_y >=SCREEN_HEIGHT:
@@ -95,8 +101,6 @@ class MyGame(arcade.Window):
         self.new_game()
 
     def new_game(self):
-        self.blue_hp = 3
-        self.red_hp = 3
         self.move_speed = 500
         self.turn_rate = 200
         self.bullet_speed = 400
@@ -106,7 +110,6 @@ class MyGame(arcade.Window):
         self.listtomakethebackround = arcade.SpriteList()
         self.listtomakethebackround.append (self.backround) 
 
-        
         self.sprite_list = arcade.SpriteList()
         
         path = "./assets/blue_ship.png"
@@ -130,22 +133,22 @@ class MyGame(arcade.Window):
         self.blue_ship.looping()
         
     def game_end(self):
-        if self.blue_hp <=0:
+        if self.blue_ship.hp <=0:
             print ("red wins") 
             self.red_wins += 1 
             print (f"red has won {self.red_wins} time(s) blue has won {self.blue_wins} time(s)")
             self.new_game ()
-        if self.red_hp <=0:
+        if self.red_ship.hp <=0:
             print ("blue wins") 
             self.blue_wins += 1 
             print (f"red has won {self.red_wins} time(s) blue has won {self.blue_wins} time(s)")
             self.new_game ()
 
     def draw_health(self):
-        for x in range(self.red_hp):
+        for x in range(self.red_ship.hp):
             arcade.draw.draw_circle_filled((x + 1)*30, SCREEN_HEIGHT-20, 10, arcade.color.RED)
 
-        for x in range(self.blue_hp):
+        for x in range(self.blue_ship.hp):
             arcade.draw.draw_circle_filled(SCREEN_WIDTH-(x + 1)*30, SCREEN_HEIGHT-20, 10, arcade.color.BLUE)
 
     def on_draw(self):
@@ -160,29 +163,20 @@ class MyGame(arcade.Window):
         self.blue_ship.do_physics(dt)
         self.red_ship.do_physics(dt)
         
-
     def on_update(self, dt):
         self.do_physics(dt)
         self.looping()
         self.game_end() 
         
-        red_bullet_hit_list = self.red_ship.get_collisions(self.blue_ship.bullet_list)
-        for rbullet in red_bullet_hit_list: 
-            rbullet.remove_from_sprite_lists()
-            self.red_ship.center_x = random.randint(0,SCREEN_WIDTH) 
-            self.red_ship.center_y = random.randint(0,SCREEN_HEIGHT) 
-            self.blue_ship.center_x = random.randint(0,SCREEN_WIDTH) 
-            self.blue_ship.center_y = random.randint(0,SCREEN_HEIGHT) 
-            self.red_hp -= 1
+        if self.red_ship.collisions_exist(self.blue_ship.bullet_list):
+            self.red_ship.reset_on_hit()
+            self.blue_ship.reset_on_hit()
+            self.red_ship.hp -= 1
             
-        blue_bullet_hit_list = self.blue_ship.get_collisions(self.red_ship.bullet_list)
-        for bbullet in blue_bullet_hit_list: 
-            bbullet.remove_from_sprite_lists()
-            self.blue_ship.center_x = random.randint(0,SCREEN_WIDTH) 
-            self.blue_ship.center_y = random.randint(0,SCREEN_HEIGHT) 
-            self.red_ship.center_x = random.randint(0,SCREEN_WIDTH) 
-            self.red_ship.center_y = random.randint(0,SCREEN_HEIGHT) 
-            self.blue_hp -= 1
+        if self.blue_ship.collisions_exist(self.red_ship.bullet_list):
+            self.red_ship.reset_on_hit()
+            self.blue_ship.reset_on_hit()
+            self.blue_ship.hp -= 1
            
 def main():
     window = MyGame()
