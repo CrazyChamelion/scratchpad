@@ -12,7 +12,12 @@ def unit_vec(sprite):
         return x, y 
 
 def do_physics(sprite, dt):
-    sprite.angle += sprite.change_angle *dt
+    sprite.angle += sprite.change_angle * dt
+
+    if hasattr(sprite, "acceleration_x"):
+        sprite.change_x += sprite.acceleration_x * dt
+    if hasattr(sprite, "acceleration_y"):
+        sprite.change_y += sprite.acceleration_y * dt
 
     sprite.center_x += sprite.change_x * dt
     sprite.center_y += sprite.change_y * dt
@@ -48,13 +53,13 @@ class Ship():
     def on_key_press(self, key):
         match key:
             case self.keys.up:
-                vel_x,vel_y = unit_vec(self.sprite)
-                self.sprite.change_y = vel_y * self.move_speed
-                self.sprite.change_x = vel_x * self.move_speed
+                x,y = unit_vec(self.sprite)
+                self.sprite.acceleration_x = x * self.move_speed
+                self.sprite.acceleration_y = y * self.move_speed
             case self.keys.down:
-                vel_x,vel_y = unit_vec(self.sprite)
-                self.sprite.change_y = -vel_y * self.move_speed
-                self.sprite.change_x = -vel_x * self.move_speed
+                x,y = unit_vec(self.sprite)
+                self.sprite.acceleration_x = -x * self.move_speed
+                self.sprite.acceleration_y = -y * self.move_speed
             case self.keys.left:
                 self.sprite.change_angle = -self.turn_rate
             case self.keys.right:
@@ -65,8 +70,8 @@ class Ship():
     def on_key_release(self, key):
         match key:
             case self.keys.up | self.keys.down:
-                self.sprite.change_y = 0
-                self.sprite.change_x = 0
+                self.sprite.acceleration_x = 0
+                self.sprite.acceleration_y = 0
             case self.keys.left | self.keys.right:
                 self.sprite.change_angle = 0
 
