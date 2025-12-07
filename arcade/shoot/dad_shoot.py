@@ -86,6 +86,11 @@ class Ship():
     def reset_on_hit(self):
         self.sprite.center_x = random.randint(0,SCREEN_WIDTH) 
         self.sprite.center_y = random.randint(0,SCREEN_HEIGHT) 
+        self.sprite.change_x = 0
+        self.sprite.change_y = 0
+        self.sprite.acceleration_x = 0
+        self.sprite.acceleration_y = 0
+        self.sprite.angle = 0
         self.bullet_list.clear()
     
     def looping(self):
