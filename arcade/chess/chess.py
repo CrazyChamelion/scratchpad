@@ -156,11 +156,14 @@ class Piece():
                     else:
                         stop = 8
                         dir = 1
+                        start = int(p.cord.i)
                         if p.cord.i < self.cord.i:
                             stop = -1
                             dir = -1
+                        if p.color != self.color:
+                            start += dir
                         # remove p and also remove any square left of p
-                        for a in range(int(p.cord.i), stop, dir):
+                        for a in range(start, stop, dir):
                             to_remove = Coordinate(a, self.cord.j)
                             if to_remove in result:
                                 result.remove(to_remove)
@@ -172,11 +175,14 @@ class Piece():
                     else:
                         stop = 8
                         dir = 1
+                        start = int(p.cord.j)
                         if p.cord.j < self.cord.j:
                             stop = -1
                             dir = -1
+                        if p.color != self.color:
+                            start += dir
                         # remove p and also remove any square left of p
-                        for a in range(int(p.cord.j), stop, dir):
+                        for a in range(start, stop, dir):
                             to_remove = Coordinate(self.cord.i, a)
                             if to_remove in result:
                                 result.remove(to_remove)
