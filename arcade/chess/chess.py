@@ -369,8 +369,17 @@ class MyGame(arcade.Window):
                                 self.sprite_list.remove(p.sprite)
                                 break
                         self.selected_piece.isfirstmove = False 
+                        
+                        #promote
+                        if self.selected_piece.type == Type.PAWN: 
+                            if move.j == 0 or move.j == 7: 
+                                self.pieces.remove (self.selected_piece)
+                                self.sprite_list.remove (self.selected_piece.sprite)
+                                piece = Piece(Type.QUEEN, self.selected_piece.color, self.selected_piece.dir, Coordinate(self.selected_piece.cord.i, self.selected_piece.cord.j))
+                                self.sprite_list.append(piece.sprite)
+                                self.pieces.append(piece)
                         self.selected_piece = None
-            #click on piece first time
+                                                                            #click on piece first time
             else:
                 for piece in self.pieces:
                     if square_click_x == piece.cord.i and square_click_y == piece.cord.j: 
