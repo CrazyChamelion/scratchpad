@@ -130,14 +130,25 @@ class Piece():
                 result.append(Coordinate(self.cord.i -a , self.cord.j+a))
                 result.append(Coordinate(self.cord.i +a , self.cord.j-a))
         elif self.type == Type.PAWN:
-            
             if self.dir == Direction.UP:
                 z = +1 
             else:
                 z = -1               
             if self.isfirstmove == True: 
                 result.append(Coordinate(self.cord.i  , self.cord.j+2* z ))      
-            result.append(Coordinate(self.cord.i  , self.cord.j+ z ))   
+            result.append(Coordinate(self.cord.i  , self.cord.j+ z )) 
+            
+            # look for captures
+            forward = 1
+            if self.color == Color.BLACK:
+                forward = -1
+            for p in pieces:
+                capturedi = p.cord.i 
+                capturedj = p.cord.j
+                if self.cord.j+forward == capturedj and self.cord.i == capturedi:
+                    result.remove (Coordinate(capturedi,capturedj))
+                if self.cord.j + forward == capturedj and (self.cord.i +1 == capturedi or self.cord.i -1 == capturedi):
+                    result.append(Coordinate(capturedi, capturedj))
             print ("a pawn was clicked")
         else:
             print ("SHIT SHIT SHIT SHIT SHIT ITS FUCKED ITS FUCKED ITS FUCKED")
