@@ -48,6 +48,7 @@ class Piece():
         self.dir = dir
         self.cord = cord
         self.init_sprite()
+        self.isfirstmove = True
 
     def init_sprite(self):
         path = "./assets/"
@@ -129,11 +130,13 @@ class Piece():
                 result.append(Coordinate(self.cord.i -a , self.cord.j+a))
                 result.append(Coordinate(self.cord.i +a , self.cord.j-a))
         elif self.type == Type.PAWN:
+            
             if self.dir == Direction.UP:
                 z = +1 
             else:
                 z = -1               
-            result.append(Coordinate(self.cord.i  , self.cord.j+2* z ))      
+            if self.isfirstmove == True: 
+                result.append(Coordinate(self.cord.i  , self.cord.j+2* z ))      
             result.append(Coordinate(self.cord.i  , self.cord.j+ z ))   
             print ("a pawn was clicked")
         else:
@@ -354,6 +357,7 @@ class MyGame(arcade.Window):
                                 self.pieces.remove (p)
                                 self.sprite_list.remove(p.sprite)
                                 break
+                        self.selected_piece.isfirstmove = False 
                         self.selected_piece = None
             #click on piece first time
             else:
@@ -361,6 +365,7 @@ class MyGame(arcade.Window):
                     if square_click_x == piece.cord.i and square_click_y == piece.cord.j: 
                             self.selected_piece = piece
                             self.pos_moves = piece.get_moves(self.pieces)
+                            
     
 def main():
     window = MyGame()
