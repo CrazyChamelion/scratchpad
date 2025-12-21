@@ -12,6 +12,9 @@ class Coordinate:
     def __init__(self, i, j):
         self.i = i
         self.j = j
+    
+    def __eq__(self, other):
+        return self.i == other.i and self.j == other.j
 
     def toXY(self ):
         return self.i * SQUARE + SQUARE / 2 , self.j * SQUARE + SQUARE / 2
@@ -139,8 +142,45 @@ class Piece():
         
         # remove moves off the board
         for r in result:
-            if r.i < 0 or r.j < 0 or r.i > 8 or r.j > 8:
+            if r.i < 0 or r.j < 0 or r.i > 7 or r.j > 7:
                 result.remove(r)
+        
+        # handle rook and queen moving through pieces horizontal or verticle
+        if self.type == Type.QUEEN or self.type == Type.ROOK:
+            for p in pieces:
+                # horizontal
+                if p.cord.j == self.cord.j:
+                    if p.cord.i == self.cord.i:
+                        # same piece
+                        continue
+                    else:
+                        stop = 8
+                        dir = 1
+                        if p.cord.i < self.cord.i:
+                            stop = -1
+                            dir = -1
+                        # remove p and also remove any square left of p
+                        for a in range(int(p.cord.i), stop, dir):
+                            to_remove = Coordinate(a, self.cord.j)
+                            if to_remove in result:
+                                result.remove(to_remove)
+                # verticle
+                if p.cord.i == self.cord.i:
+                    if p.cord.j == self.cord.j:
+                        # same piece
+                        continue
+                    else:
+                        stop = 8
+                        dir = 1
+                        if p.cord.j < self.cord.j:
+                            stop = -1
+                            dir = -1
+                        # remove p and also remove any square left of p
+                        for a in range(int(p.cord.j), stop, dir):
+                            to_remove = Coordinate(self.cord.i, a)
+                            if to_remove in result:
+                                result.remove(to_remove)
+                    
 
         # prevent moves that land on color
         for p in pieces: 
