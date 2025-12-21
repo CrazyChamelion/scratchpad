@@ -145,6 +145,33 @@ class Piece():
             if r.i < 0 or r.j < 0 or r.i > 7 or r.j > 7:
                 result.remove(r)
         
+        # handle diagonal moving through pieces for bishop and queen
+        if self.type == Type.QUEEN or self.type == Type.BISHOP:
+            for p in pieces:
+                if self.cord.i == p.cord.i and self.cord.j == p.cord.j:
+                    # this piece is self
+                    continue
+
+                deltai = p.cord.i - self.cord.i
+                deltaj = p.cord.j - self.cord.j
+                if abs(deltai) != abs(deltaj):
+                    # piece p is not on a diagonal with self
+                    continue
+                di = 1
+                if deltai < 0:
+                    di = -1
+                dj = 1
+                if deltaj < 0:
+                    dj = -1
+                start = 0
+                if p.color != self.color:
+                    start = 1
+                for a in range(start, 7):
+                    to_remove = Coordinate(p.cord.i + a*di, p.cord.j + a*dj)
+                    if to_remove in result:
+                        result.remove(to_remove)
+                
+
         # handle rook and queen moving through pieces horizontal or verticle
         if self.type == Type.QUEEN or self.type == Type.ROOK:
             for p in pieces:
