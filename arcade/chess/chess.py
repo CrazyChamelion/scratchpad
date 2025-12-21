@@ -77,7 +77,8 @@ class Piece():
         self.cord = coord
         self.sprite.center_x, self.sprite.center_y = coord.toXY()
     
-    def get_moves(self):
+    def get_moves(self, pieces):
+        
         result = []
         if self.type == Type.ROOK:
             print ("a rook was clicked")
@@ -135,6 +136,23 @@ class Piece():
         else:
             print ("SHIT SHIT SHIT SHIT SHIT ITS FUCKED ITS FUCKED ITS FUCKED")
             raise Exception("Unknown piece type was cliced")
+        
+        # remove moves off the board
+        for r in result:
+            if r.i < 0 or r.j < 0 or r.i > 8 or r.j > 8:
+                result.remove(r)
+
+        # prevent moves that land on color
+        for p in pieces: 
+            if p.color != self.color:
+                continue
+            piecei = p.cord.i  
+            piecej = p.cord.j
+            for r in result:
+                if r.j == piecej and r.i == piecei:
+                    result.remove(r) 
+                
+                
         return result
 
 
@@ -236,10 +254,11 @@ class MyGame(arcade.Window):
                 arcade.draw_rect_filled(arcade.rect.XYWH(x , y, SQUARE , SQUARE ),arcade.color.WHITE)
                 x=x+SQUARE*2
             y = y + SQUARE
-
-    def find_clicked_piece(self, x, y):
-        return 0
-
+    def on_key_press (self, key, modifiers ):
+        if key == arcade.key.ESCAPE:
+            self.clicked_on = False 
+            self.pos_moves.clear()
+            self.selected_piece = None           
     def on_mouse_press(self, x, y, button, key_modifiers):
         if button == arcade.MOUSE_BUTTON_LEFT :
             print (x,y)
@@ -256,7 +275,7 @@ class MyGame(arcade.Window):
                 for piece in self.pieces:
                     if square_click_x == piece.cord.i and square_click_y == piece.cord.j: 
                             self.selected_piece = piece
-                            self.pos_moves = piece.get_moves()
+                            self.pos_moves = piece.get_moves(self.pieces)
     
 def main():
     window = MyGame()
