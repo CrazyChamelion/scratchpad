@@ -327,23 +327,35 @@ class MyGame(arcade.Window):
                 arcade.draw_rect_filled(arcade.rect.XYWH(x , y, SQUARE , SQUARE ),arcade.color.WHITE)
                 x=x+SQUARE*2
             y = y + SQUARE
+
     def on_key_press (self, key, modifiers ):
         if key == arcade.key.ESCAPE:
             self.clicked_on = False 
             self.pos_moves.clear()
-            self.selected_piece = None           
+            self.selected_piece = None      
+
     def on_mouse_press(self, x, y, button, key_modifiers):
         if button == arcade.MOUSE_BUTTON_LEFT :
             print (x,y)
             square_click_x = x // SQUARE
             square_click_y = y // SQUARE 
             print (square_click_x, square_click_y)
+            #if clicked on piece last time
             if self.selected_piece:
                 for move in self.pos_moves:
                     if square_click_x == move.i and square_click_y == move.j:  
                         self.selected_piece.move_to(Coordinate(square_click_x, square_click_y))
                         self.pos_moves.clear()
+                        # check for capture
+                        for p in self.pieces:
+                            capturedi = p.cord.i 
+                            capturedj = p.cord.j
+                            if (move.i == capturedi and move.j == capturedj) and p != self.selected_piece: 
+                                self.pieces.remove (p)
+                                self.sprite_list.remove(p.sprite)
+                                break
                         self.selected_piece = None
+            #click on piece first time
             else:
                 for piece in self.pieces:
                     if square_click_x == piece.cord.i and square_click_y == piece.cord.j: 
