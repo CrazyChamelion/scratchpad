@@ -118,6 +118,31 @@ class Piece():
             result.append(Coordinate(self.cord.i , self.cord.j-1))
             result.append(Coordinate(self.cord.i +1 , self.cord.j))
             result.append(Coordinate(self.cord.i -1 , self.cord.j))
+        
+            # look for castle
+            if self.isfirstmove:
+                left_rook_moved = True
+                right_rook_moved = True
+                for p in pieces:
+                    if p.color != self.color:
+                        continue
+                    if not p.isfirstmove:
+                        continue
+                    if p.type == Type.ROOK:
+                        if p.cord.i == 0:
+                            left_rook_moved = False
+                            
+                        else:
+                            right_rook_moved = False
+                            
+                
+                if left_rook_moved == False:
+                     result.append(Coordinate(self.cord.i -2 , self.cord.j))
+                     
+                if right_rook_moved == False:
+                    result.append(Coordinate(self.cord.i +2 , self.cord.j))
+                    
+
         elif self.type == Type.QUEEN:
             print ("a queen was clicked")
             for a in range (10):
@@ -251,7 +276,7 @@ class MyGame(arcade.Window):
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, "Chess")
         # 30, 30 top left. Used 30 to leave room for the windows controls
         self.set_location(0, 30)
-        arcade.set_background_color(arcade.color.DARK_GREEN)
+        arcade.set_background_color(arcade.color.WHITE)
         self.reset_board()
         self.clicked_on = False
         
@@ -275,7 +300,7 @@ class MyGame(arcade.Window):
         rook = 0
         knight = 1
         bishop = 2 
-
+#
         for i in range(2):
             # rooks
             piece = Piece(Type.ROOK, Color.WHITE, Direction.UP, Coordinate(rook, 0))
@@ -306,19 +331,19 @@ class MyGame(arcade.Window):
             bishop = bishop + 3 
 
         #king
-        piece = Piece(Type.KING, Color.WHITE, Direction.UP, Coordinate(3, 0))
+        piece = Piece(Type.KING, Color.WHITE, Direction.UP, Coordinate(4, 0))
         self.sprite_list.append(piece.sprite)
         self.pieces.append(piece)
             
-        piece = Piece(Type.KING, Color.BLACK, Direction.DOWN, Coordinate(3, 7))
+        piece = Piece(Type.KING, Color.BLACK, Direction.DOWN, Coordinate(4, 7))
         self.sprite_list.append(piece.sprite)
         self.pieces.append(piece)
-        #queen
-        piece = Piece(Type.QUEEN, Color.WHITE, Direction.UP, Coordinate(4, 0))
+        ##queen
+        piece = Piece(Type.QUEEN, Color.WHITE, Direction.UP, Coordinate(3, 0))
         self.sprite_list.append(piece.sprite)
         self.pieces.append(piece)
             
-        piece = Piece(Type.QUEEN, Color.BLACK, Direction.DOWN, Coordinate(4, 7))
+        piece = Piece(Type.QUEEN, Color.BLACK, Direction.DOWN, Coordinate(3, 7))
         self.sprite_list.append(piece.sprite)
         self.pieces.append(piece)
          
@@ -341,7 +366,7 @@ class MyGame(arcade.Window):
                 x = x + SQUARE
             for column in range(4):
                 # X, Y, Width, Height
-                arcade.draw_rect_filled(arcade.rect.XYWH(x , y, SQUARE , SQUARE ),arcade.color.WHITE)
+                arcade.draw_rect_filled(arcade.rect.XYWH(x , y, SQUARE , SQUARE ),arcade.color.DARK_GREEN)
                 x=x+SQUARE*2
             y = y + SQUARE
 
@@ -362,6 +387,20 @@ class MyGame(arcade.Window):
                 for move in self.pos_moves:
                     if square_click_x == move.i and square_click_y == move.j:  
                         self.selected_piece.move_to(Coordinate(square_click_x, square_click_y))
+                        #move rook during castel
+                        if self.selected_piece.type == Type.KING and self.selected_piece.isfirstmove:
+                            if square_click_x == 2:
+                                for p in self.pieces:
+                                    if p.type == Type.ROOK and p.cord.i == 0 and p.color == self.selected_piece.color:
+                                        p.move_to(Coordinate (3,self.selected_piece.cord.j))
+                            if square_click_x == 6:
+                                for p in self.pieces:
+                                     if p.type == Type.ROOK and p.cord.i == 7 and p.color == self.selected_piece.color:
+                                           p.move_to(Coordinate (5,self.selected_piece.cord.j))
+                        
+                        
+                
+
                         self.pos_moves.clear()
                         # check for capture
                         for p in self.pieces:
@@ -381,10 +420,15 @@ class MyGame(arcade.Window):
                                 piece = Piece(Type.QUEEN, self.selected_piece.color, self.selected_piece.dir, Coordinate(self.selected_piece.cord.i, self.selected_piece.cord.j))
                                 self.sprite_list.append(piece.sprite)
                                 self.pieces.append(piece)
-                        self.selected_piece = None
+                      
                         self.whiteturn = not self.whiteturn   
-                                                                            #click on piece first time
+                        
+                    
+
+
+                        self.selected_piece = None
             else:
+
                 for piece in self.pieces:
                     
                     if self.whiteturn == True and piece.color == Color.BLACK:
