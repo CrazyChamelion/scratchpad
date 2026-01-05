@@ -137,7 +137,8 @@ class Piece():
             if self.isfirstmove == True: 
                 result.append(Coordinate(self.cord.i  , self.cord.j+2* z ))      
             result.append(Coordinate(self.cord.i  , self.cord.j+ z )) 
-            
+
+        
             # look for captures
             forward = 1
             if self.color == Color.BLACK:
@@ -153,7 +154,8 @@ class Piece():
         else:
             print ("SHIT SHIT SHIT SHIT SHIT ITS FUCKED ITS FUCKED ITS FUCKED")
             raise Exception("Unknown piece type was cliced")
-        
+         
+
         # remove moves off the board
         for r in result:
             if r.i < 0 or r.j < 0 or r.i > 7 or r.j > 7:
@@ -259,6 +261,7 @@ class MyGame(arcade.Window):
         self.selected_piece = None
         self.sprite_list = arcade.SpriteList()
         self.pieces = []
+        self.whiteturn = True
         # makes pawns
         for col in range(8):
             piece = Piece(Type.PAWN, Color.WHITE, Direction.UP, Coordinate(col, 1))
@@ -379,13 +382,21 @@ class MyGame(arcade.Window):
                                 self.sprite_list.append(piece.sprite)
                                 self.pieces.append(piece)
                         self.selected_piece = None
+                        self.whiteturn = not self.whiteturn   
                                                                             #click on piece first time
             else:
                 for piece in self.pieces:
+                    
+                    if self.whiteturn == True and piece.color == Color.BLACK:
+                        continue
+                    
+                    if self.whiteturn == False and piece.color == Color.WHITE:
+                        continue
+                         
                     if square_click_x == piece.cord.i and square_click_y == piece.cord.j: 
-                            self.selected_piece = piece
-                            self.pos_moves = piece.get_moves(self.pieces)
-                            
+                        self.selected_piece = piece
+                        self.pos_moves = piece.get_moves(self.pieces)
+                              
     
 def main():
     window = MyGame()
