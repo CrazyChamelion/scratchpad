@@ -86,14 +86,14 @@ class Piece():
         result = []
         if self.type == Type.ROOK:
             print ("a rook was clicked")
-            for a in range (10):
+            for a in range (1,10):
                 result.append(Coordinate(self.cord.i +a , self.cord.j))
                 result.append(Coordinate(self.cord.i -a , self.cord.j))
                 result.append(Coordinate(self.cord.i  , self.cord.j+a))
                 result.append(Coordinate(self.cord.i  , self.cord.j-a))
         elif self.type == Type.BISHOP: 
             print ("a bishop was clicked")
-            for a in range (10):
+            for a in range (1,10):
                 result.append(Coordinate(self.cord.i +a , self.cord.j+a))
                 result.append(Coordinate(self.cord.i -a , self.cord.j-a))
                 result.append(Coordinate(self.cord.i -a , self.cord.j+a))
@@ -149,7 +149,7 @@ class Piece():
 
         elif self.type == Type.QUEEN:
             print ("a queen was clicked")
-            for a in range (10):
+            for a in range (1,10):
                 result.append(Coordinate(self.cord.i +a , self.cord.j))
                 result.append(Coordinate(self.cord.i -a , self.cord.j))
                 result.append(Coordinate(self.cord.i  , self.cord.j+a))
@@ -158,6 +158,7 @@ class Piece():
                 result.append(Coordinate(self.cord.i -a , self.cord.j-a))
                 result.append(Coordinate(self.cord.i -a , self.cord.j+a))
                 result.append(Coordinate(self.cord.i +a , self.cord.j-a))
+                
         elif self.type == Type.PAWN:
             if self.dir == Direction.UP:
                 z = +1 
