@@ -123,23 +123,27 @@ class Piece():
             if self.isfirstmove:
                 left_rook_moved = True
                 right_rook_moved = True
+                right_is_blocked = False
+                left_is_blocked = False
                 for p in pieces:
-                    if p.color != self.color:
-                        continue
-                    if not p.isfirstmove:
+                    if p.cord.j == self.cord.j:
+                        if p.cord.i == 1 or p.cord.i == 2 or p.cord.i == 3:
+                            left_is_blocked = True
+                        if p.cord.i == 6 or p.cord.i == 5:
+                            right_is_blocked = True
+                    if not p.isfirstmove or p.color != self.color:
                         continue
                     if p.type == Type.ROOK:
                         if p.cord.i == 0:
                             left_rook_moved = False
-                            
-                        else:
+                        elif p.cord.i == 7:
                             right_rook_moved = False
                             
                 
-                if left_rook_moved == False:
+                if left_rook_moved == False and not left_is_blocked:
                      result.append(Coordinate(self.cord.i -2 , self.cord.j))
                      
-                if right_rook_moved == False:
+                if right_rook_moved == False and not right_is_blocked:
                     result.append(Coordinate(self.cord.i +2 , self.cord.j))
                     
 
