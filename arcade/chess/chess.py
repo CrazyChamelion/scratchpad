@@ -278,7 +278,8 @@ class MyGame(arcade.Window):
         arcade.set_background_color(arcade.color.WHITE)
         self.reset_board()
         self.clicked_on = False
-        
+        self.incheck = False
+        self.kingpos = None
 
     def reset_board(self):
         self.pos_moves = []
@@ -353,9 +354,10 @@ class MyGame(arcade.Window):
             arcade.draw_rect_filled(arcade.rect.XYWH((self.selected_piece.cord.i + 0.5) *SQUARE , (self.selected_piece.cord.j +0.5) * SQUARE , SQUARE , SQUARE ),arcade.color.RED)
         for move in self.pos_moves:
             arcade.draw_rect_filled(arcade.rect.XYWH((move.i + 0.5) *SQUARE , (move.j +0.5) * SQUARE , SQUARE , SQUARE ),arcade.color.RED)
-        self.sprite_list.draw()
         
-
+        if self.incheck:
+            arcade.draw_rect_filled(arcade.rect.XYWH((self.kingpos.i + 0.5) *SQUARE , (self.kingpos.j +0.5) * SQUARE , SQUARE , SQUARE ),arcade.color.NEON_CARROT)
+        self.sprite_list.draw()
 
     def draw_grid(self):
         y=SQUARE / 2
@@ -420,7 +422,7 @@ class MyGame(arcade.Window):
                       
                         self.whiteturn = not self.whiteturn   
                         self.selected_piece = None
-                        self.incheck = self.ischeck()
+                        self.incheck,self.kingpos = self.ischeck()
             else:
                 for piece in self.pieces:
                     if self.whiteturn == True and piece.color == Color.BLACK:
@@ -443,13 +445,12 @@ class MyGame(arcade.Window):
             if p.color != mycolor:
                 enemymoves.extend (p.get_moves(self.pieces))
             elif p.type == Type.KING:
-                kingi = p.cord.i
-                kingj = p.cord.j
+                kingpos = Coordinate(p.cord.i, p.cord.j)
         
         for move in enemymoves:
-            if move.i == kingi and move.j == kingj:
-                return True
-        return False
+            if move.i == kingpos.i and move.j == kingpos.j:
+                return True, kingpos
+        return False, None
 def main():
     window = MyGame()
     arcade.run()
