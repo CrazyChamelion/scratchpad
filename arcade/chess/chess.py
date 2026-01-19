@@ -429,9 +429,7 @@ class MyGame(arcade.Window):
                         self.whiteturn = not self.whiteturn   
                         self.selected_piece = None
             else:
-
                 for piece in self.pieces:
-                    
                     if self.whiteturn == True and piece.color == Color.BLACK:
                         continue
                     
