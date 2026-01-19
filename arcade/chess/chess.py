@@ -427,10 +427,6 @@ class MyGame(arcade.Window):
                                 self.pieces.append(piece)
                       
                         self.whiteturn = not self.whiteturn   
-                        
-                    
-
-
                         self.selected_piece = None
             else:
 
