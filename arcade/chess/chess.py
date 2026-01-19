@@ -85,21 +85,18 @@ class Piece():
         
         result = []
         if self.type == Type.ROOK:
-            print ("a rook was clicked")
             for a in range (1,10):
                 result.append(Coordinate(self.cord.i +a , self.cord.j))
                 result.append(Coordinate(self.cord.i -a , self.cord.j))
                 result.append(Coordinate(self.cord.i  , self.cord.j+a))
                 result.append(Coordinate(self.cord.i  , self.cord.j-a))
         elif self.type == Type.BISHOP: 
-            print ("a bishop was clicked")
             for a in range (1,10):
                 result.append(Coordinate(self.cord.i +a , self.cord.j+a))
                 result.append(Coordinate(self.cord.i -a , self.cord.j-a))
                 result.append(Coordinate(self.cord.i -a , self.cord.j+a))
                 result.append(Coordinate(self.cord.i +a , self.cord.j-a))
         elif self.type == Type.KNIGHT: 
-            print ("a knight was clicked")
             result.append(Coordinate(self.cord.i +2 , self.cord.j+1))
             result.append(Coordinate(self.cord.i +2 , self.cord.j-1))
             result.append(Coordinate(self.cord.i +1 , self.cord.j+2))
@@ -109,7 +106,6 @@ class Piece():
             result.append(Coordinate(self.cord.i -1 , self.cord.j+2))
             result.append(Coordinate(self.cord.i -1 , self.cord.j-2))
         elif self.type == Type.KING:
-            print ("a king was clicked")
             result.append(Coordinate(self.cord.i +1 , self.cord.j+1))
             result.append(Coordinate(self.cord.i -1 , self.cord.j-1))
             result.append(Coordinate(self.cord.i +1 , self.cord.j-1))
@@ -148,7 +144,6 @@ class Piece():
                     
 
         elif self.type == Type.QUEEN:
-            print ("a queen was clicked")
             for a in range (1,10):
                 result.append(Coordinate(self.cord.i +a , self.cord.j))
                 result.append(Coordinate(self.cord.i -a , self.cord.j))
@@ -180,7 +175,6 @@ class Piece():
                     result.remove (Coordinate(capturedi,capturedj))
                 if self.cord.j + forward == capturedj and (self.cord.i +1 == capturedi or self.cord.i -1 == capturedi):
                     result.append(Coordinate(capturedi, capturedj))
-            print ("a pawn was clicked")
         else:
             print ("SHIT SHIT SHIT SHIT SHIT ITS FUCKED ITS FUCKED ITS FUCKED")
             raise Exception("Unknown piece type was cliced")
@@ -383,10 +377,8 @@ class MyGame(arcade.Window):
 
     def on_mouse_press(self, x, y, button, key_modifiers):
         if button == arcade.MOUSE_BUTTON_LEFT :
-            print (x,y)
             square_click_x = x // SQUARE
             square_click_y = y // SQUARE 
-            print (square_click_x, square_click_y)
             #if clicked on piece last time
             if self.selected_piece:
                 for move in self.pos_moves:
@@ -428,6 +420,7 @@ class MyGame(arcade.Window):
                       
                         self.whiteturn = not self.whiteturn   
                         self.selected_piece = None
+                        self.incheck = self.ischeck()
             else:
                 for piece in self.pieces:
                     if self.whiteturn == True and piece.color == Color.BLACK:
@@ -440,7 +433,23 @@ class MyGame(arcade.Window):
                         self.selected_piece = piece
                         self.pos_moves = piece.get_moves(self.pieces)
                               
-    
+    def ischeck(self):
+        enemymoves = []
+        mycolor = Color.BLACK
+        if self.whiteturn:
+            mycolor = Color.WHITE
+
+        for p in self.pieces:
+            if p.color != mycolor:
+                enemymoves.extend (p.get_moves(self.pieces))
+            elif p.type == Type.KING:
+                kingi = p.cord.i
+                kingj = p.cord.j
+        
+        for move in enemymoves:
+            if move.i == kingi and move.j == kingj:
+                return True
+        return False
 def main():
     window = MyGame()
     arcade.run()
