@@ -23,8 +23,8 @@ class Orbit(Enum):
 
 def autp(au):
     # make mars at 1.5 au take up most of the screen
-    #return au*(SCREEN_WIDTH//2 - 50)/1.5 # mars is outer
-    return au*(SCREEN_WIDTH//2 - 50)/10
+    return au*(SCREEN_WIDTH//2 - 50)/1.5 # mars is outer
+    #return au*(SCREEN_WIDTH//2 - 50)/10 # zoomed out
 
 class Planet():
     def __init__(self, r_o, r_p, m, c, obt):
@@ -106,13 +106,13 @@ class MyGame(arcade.Window):
         arcade.set_background_color(arcade.color.BLACK)
         self.plannets = []
         # mercury
-        self.plannets.append(Planet(0.387, 10, 1.66e-7, arcade.color.RED, Orbit.HYPERBOLIC))
+        self.plannets.append(Planet(0.387, 10, 1.66e-7, arcade.color.RED, Orbit.CIRCLE))
         # venus
-        self.plannets.append(Planet(0.722, 10, 2.45e-6, arcade.color.LIGHT_BLUE, Orbit.PARABILIC))
+        self.plannets.append(Planet(0.722, 10, 2.45e-6, arcade.color.LIGHT_BLUE, Orbit.CIRCLE))
         # earth
         self.plannets.append(Planet(1, 10, 3e-6, arcade.color.BLUE, Orbit.CIRCLE))
         # mars
-        self.plannets.append(Planet(1.52, 10, 3.23e-7, arcade.color.ORANGE, Orbit.ELIPSE))
+        self.plannets.append(Planet(1.52, 10, 3.23e-7, arcade.color.ORANGE, Orbit.CIRCLE))
 
     def on_draw(self):
         """ Render the screen. """
@@ -121,8 +121,8 @@ class MyGame(arcade.Window):
         for p in self.plannets:
             p.draw()
         # sun
-        #arcade.draw_circle_filled(SUNX,SUNY,30,arcade.color.YELLOW) 
-        arcade.draw_circle_filled(SUNX,SUNY,3,arcade.color.YELLOW) 
+        arcade.draw_circle_filled(SUNX,SUNY,30,arcade.color.YELLOW) 
+        #arcade.draw_circle_filled(SUNX,SUNY,3,arcade.color.YELLOW) 
 
     def on_update(self, delta_time):
         """ Movement and game logic """
