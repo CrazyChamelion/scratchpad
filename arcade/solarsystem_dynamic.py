@@ -1,7 +1,7 @@
 import arcade
 import math
 from enum import Enum
-
+import time 
 # Constants
 SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 1000
@@ -113,6 +113,8 @@ class MyGame(arcade.Window):
         self.plannets.append(Planet(1, 10, 3e-6, arcade.color.BLUE, Orbit.CIRCLE))
         # mars
         self.plannets.append(Planet(1.52, 10, 3.23e-7, arcade.color.ORANGE, Orbit.CIRCLE))
+        self.petx = 0
+        self.pety = 0
 
     def on_draw(self):
         """ Render the screen. """
@@ -123,11 +125,32 @@ class MyGame(arcade.Window):
         # sun
         arcade.draw_circle_filled(SUNX,SUNY,30,arcade.color.YELLOW) 
         #arcade.draw_circle_filled(SUNX,SUNY,3,arcade.color.YELLOW) 
+        self.petrova_d()
+
+    def petrova_d(self):
+            arcade.draw_circle_filled(autp(self.petx)+SUNX,autp(self.pety)+SUNY,10,arcade.color.BLUE)
+            
+
+    def petrova_u(self):
+        venus = self.plannets[1]
+        dx = venus.x - self.petx 
+        dy = venus.y - self.pety 
+        len = math.sqrt((dx**2 + dy**2 ))
+        if len <0.001:
+            self.petx = 0 
+        dx = dx / len
+        dy = dy / len
+        petvel = 0.01
+        self.petx += petvel * dx
+        self.pety += petvel * dy
+    
+            
 
     def on_update(self, delta_time):
         """ Movement and game logic """
         for p in self.plannets:
             p.update()
+        self.petrova_u()
 
 def main():
     """ Main method"""
