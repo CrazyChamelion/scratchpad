@@ -113,8 +113,8 @@ class MyGame(arcade.Window):
         self.plannets.append(Planet(1, 10, 3e-6, arcade.color.BLUE, Orbit.CIRCLE))
         # mars
         self.plannets.append(Planet(1.52, 10, 3.23e-7, arcade.color.ORANGE, Orbit.CIRCLE))
-        self.petx = 0
-        self.pety = 0
+        self.petx = []
+        self.pety = []
 
     def on_draw(self):
         """ Render the screen. """
@@ -128,21 +128,32 @@ class MyGame(arcade.Window):
         self.petrova_d()
 
     def petrova_d(self):
-            arcade.draw_circle_filled(autp(self.petx)+SUNX,autp(self.pety)+SUNY,10,arcade.color.BLUE)
+            for i in range (len(self.petx)):
+                
+                arcade.draw_circle_filled(autp(self.petx[i])+SUNX,autp(self.pety[i])+SUNY,1,arcade.color.PURPLE)
             
 
     def petrova_u(self):
+        self.petx.append(0)
+        self.pety.append(0)
         venus = self.plannets[1]
-        dx = venus.x - self.petx 
-        dy = venus.y - self.pety 
-        len = math.sqrt((dx**2 + dy**2 ))
-        if len <0.001:
-            self.petx = 0 
-        dx = dx / len
-        dy = dy / len
-        petvel = 0.01
-        self.petx += petvel * dx
-        self.pety += petvel * dy
+        remove_first = False
+        for i in range(len(self.petx)):
+            x = self.petx[i]
+            y = self.pety[i]
+            dx = venus.x - x 
+            dy = venus.y - y 
+            length = math.sqrt((dx**2 + dy**2 ))
+            if length < 0.001:
+                remove_first = True
+            dx = dx / length
+            dy = dy / length
+            petvel = 0.0078
+            self.petx[i] += petvel * dx
+            self.pety[i] += petvel * dy
+        if remove_first:
+            self.petx.pop(0)
+            self.pety.pop(0)
     
             
 
