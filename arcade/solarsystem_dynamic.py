@@ -26,6 +26,45 @@ def autp(au):
     return au*(SCREEN_WIDTH//2 - 50)/1.5 # mars is outer
     #return au*(SCREEN_WIDTH//2 - 50)/10 # zoomed out
 
+class Petrova():
+    def __init__(self):
+        self.x = 0
+        self.y = 0
+        self.to_plant = True
+    
+    def draw(self):
+        if self.to_plant:
+            c = arcade.color.PURPLE
+        else:
+            c = arcade.color.PINK
+
+        arcade.draw_circle_filled(autp(self.x)+SUNX,autp(self.y)+SUNY,1,c)
+
+    def update(self, venus):
+        if self.to_plant:
+            dx = venus.x - self.x 
+            dy = venus.y - self.y 
+        else:
+            # to the sun
+            dx = 0 - self.x 
+            dy = 0 - self.y 
+        
+        length = math.sqrt((dx**2 + dy**2 ))
+        tolerance = 0.001
+        if not self.to_plant:
+            tolerance = 0.1
+        if length < tolerance:
+            if not self.to_plant:
+                return True
+            self.to_plant = not self.to_plant
+
+        dx = dx / length
+        dy = dy / length
+        petvel = 0.0078
+        self.x += petvel * dx
+        self.y += petvel * dy
+        return False
+
 class Planet():
     def __init__(self, r_o, r_p, m, c, obt):
         self.r_o = r_o
@@ -86,7 +125,6 @@ class Planet():
             self.old_pos.clear()
             self.angle_traversed = 0
         if self.pas_track_counter % 10 == 0:
-            print(self.angle_traversed)
             self.old_pos.append((SUNX + autp(self.x), SUNY + autp(self.y)))
 
     def draw(self):
@@ -113,8 +151,7 @@ class MyGame(arcade.Window):
         self.plannets.append(Planet(1, 10, 3e-6, arcade.color.BLUE, Orbit.CIRCLE))
         # mars
         self.plannets.append(Planet(1.52, 10, 3.23e-7, arcade.color.ORANGE, Orbit.CIRCLE))
-        self.petx = []
-        self.pety = []
+        self.pet = []
 
     def on_draw(self):
         """ Render the screen. """
@@ -125,35 +162,20 @@ class MyGame(arcade.Window):
         # sun
         arcade.draw_circle_filled(SUNX,SUNY,30,arcade.color.YELLOW) 
         #arcade.draw_circle_filled(SUNX,SUNY,3,arcade.color.YELLOW) 
-        self.petrova_d()
 
-    def petrova_d(self):
-            for i in range (len(self.petx)):
+        for p in self.pet:
+            p.draw()
                 
-                arcade.draw_circle_filled(autp(self.petx[i])+SUNX,autp(self.pety[i])+SUNY,1,arcade.color.PURPLE)
             
 
     def petrova_u(self):
-        self.petx.append(0)
-        self.pety.append(0)
-        venus = self.plannets[1]
+        self.pet.append(Petrova())
         remove_first = False
-        for i in range(len(self.petx)):
-            x = self.petx[i]
-            y = self.pety[i]
-            dx = venus.x - x 
-            dy = venus.y - y 
-            length = math.sqrt((dx**2 + dy**2 ))
-            if length < 0.001:
+        for p in self.pet:
+            if p.update(self.plannets[1]):
                 remove_first = True
-            dx = dx / length
-            dy = dy / length
-            petvel = 0.0078
-            self.petx[i] += petvel * dx
-            self.pety[i] += petvel * dy
         if remove_first:
-            self.petx.pop(0)
-            self.pety.pop(0)
+            self.pet.pop(0)
     
             
 
