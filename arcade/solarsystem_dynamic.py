@@ -65,6 +65,49 @@ class Petrova():
         self.y += petvel * dy
         return False
 
+class PlannetHopper():
+    def __init__(self):
+        self.x = 0
+        self.y = 0
+        self.p_index = 0
+        self.colors = [
+            arcade.color.RED,
+            arcade.color.LIGHT_BLUE,
+            arcade.color.BLUE,
+            arcade.color.ORANGE
+        ]
+        self.velocities = [
+            0.02,
+            0.0078,
+            0.0078,
+            0.0078
+        ]
+    
+    def draw(self):
+        if self.p_index >= len(self.colors):
+            return
+        c = self.colors[self.p_index]
+        arcade.draw_circle_filled(autp(self.x)+SUNX,autp(self.y)+SUNY,1,c)
+
+    def update(self, plannets):
+        if self.p_index >= len(plannets):
+            return True
+        target = plannets[self.p_index]
+        dx = target.x - self.x 
+        dy = target.y - self.y  
+        length = math.sqrt((dx**2 + dy**2 ))
+        if length < 0.001:
+            self.p_index += 1
+            if self.p_index >= len(self.colors):
+                return True
+
+        dx = dx / length
+        dy = dy / length
+        petvel = self.velocities[self.p_index]
+        self.x += petvel * dx
+        self.y += petvel * dy
+        return False
+
 class Planet():
     def __init__(self, r_o, r_p, m, c, obt):
         self.r_o = r_o
@@ -152,6 +195,7 @@ class MyGame(arcade.Window):
         # mars
         self.plannets.append(Planet(1.52, 10, 3.23e-7, arcade.color.ORANGE, Orbit.CIRCLE))
         self.pet = []
+        self.hopper = []
 
     def on_draw(self):
         """ Render the screen. """
@@ -165,8 +209,9 @@ class MyGame(arcade.Window):
 
         for p in self.pet:
             p.draw()
-                
-            
+
+        for p in self.hopper:
+            p.draw()        
 
     def petrova_u(self):
         self.pet.append(Petrova())
@@ -177,13 +222,21 @@ class MyGame(arcade.Window):
         if remove_first:
             self.pet.pop(0)
     
-            
+    def hopper_u(self):
+        self.hopper.append(PlannetHopper())
+        to_remove = []
+        for p in self.hopper:
+            if p.update(self.plannets):
+                to_remove.append(p)
+        for p in to_remove:
+            self.hopper.remove(p)
 
     def on_update(self, delta_time):
         """ Movement and game logic """
         for p in self.plannets:
             p.update()
         self.petrova_u()
+        self.hopper_u()
 
 def main():
     """ Main method"""
