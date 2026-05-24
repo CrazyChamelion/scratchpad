@@ -63,6 +63,12 @@ class Rogue(arcade.Window):
         self.player_x = random.randint(1,WORLD_WIDTH-2)
         self.player_y = random.randint(1,WORLD_HEIGH-2)
         self.player_tex = self.get_texture("player")
+        self.moving_up = False
+        self.moving_down = False
+        self.moving_left = False
+        self.moving_right = False
+        self.frames_to_move = 8
+        self.move_frame = 0
         self.setup_level()
 
     def setup_level(self):
@@ -106,20 +112,24 @@ class Rogue(arcade.Window):
 
     def on_update(self, delta_time):
         """ Movement and game logic """
-        pass
+        if not (self.moving_left or self.moving_right or self.moving_up or self.moving_down):
+            return
+        else:
+            self.move_frame += 1
+            if self.move_frame != self.frames_to_move:
+                return
+            else:
+                self.move_frame = 0
 
-
-    def on_key_press(self, symbol, modifiers):
-        """Called whenever a key is pressed."""
         new_x = self.player_x
         new_y = self.player_y
-        if symbol == arcade.key.W:
+        if self.moving_up:
            new_y += 1 
-        elif symbol == arcade.key.S:
+        elif self.moving_down:
            new_y -= 1 
-        elif symbol == arcade.key.A:
+        elif self.moving_left:
            new_x -= 1 
-        elif symbol == arcade.key.D:
+        elif self.moving_right:
            new_x += 1 
         # inside the map
         if new_x < WORLD_WIDTH and new_y < WORLD_WIDTH and new_x >= 0 and new_y >= 0:
@@ -127,6 +137,29 @@ class Rogue(arcade.Window):
             if self.level_int[new_y][new_x] == 0:
                 self.player_x = new_x
                 self.player_y = new_y
+
+
+    def on_key_press(self, symbol, modifiers):
+        """Called whenever a key is pressed."""
+        if symbol == arcade.key.A:
+            self.moving_left = True
+        elif symbol == arcade.key.D:
+            self.moving_right = True
+        elif symbol == arcade.key.S:
+            self.moving_down = True
+        elif symbol == arcade.key.W:
+            self.moving_up = True
+        
+    def on_key_release(self, symbol, modifiers):
+        if symbol == arcade.key.A:
+            self.moving_left = False
+        elif symbol == arcade.key.D:
+            self.moving_right = False
+        elif symbol == arcade.key.S:
+            self.moving_down = False
+        elif symbol == arcade.key.W:
+            self.moving_up = False
+        
 
 def main():
     """ Main method"""
