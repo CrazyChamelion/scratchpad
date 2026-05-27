@@ -3,14 +3,17 @@ import math
 from enum import Enum
 import time 
 import random
+from level_gen import generate_level 
+
 # Constants
 SCREEN_WIDTH = 1800
 SCREEN_HEIGHT = 1300
 SCREEN_TITLE = "RogueLike"
 SHEET_PATH = "assets/urizen_onebit_tileset__v2d0.png"
-DISPLAY_SCALE = 6
+DISPLAY_SCALE = 3
 RAW_TILE_SIZE = 12
 TILE_SIZE = RAW_TILE_SIZE * DISPLAY_SCALE
+
 
 SPRITES_COORDS: dict[str, tuple[int, int, int, int]] = {
     "stone1": (1, 27, 12, 12),
@@ -21,31 +24,14 @@ SPRITES_COORDS: dict[str, tuple[int, int, int, int]] = {
     "floor1": (1, 92, 12, 12),
     "floor2": (14, 92, 12, 12),
     "floor3": (27, 92, 12, 12),
-    "player": (1015, 144, 12, 12)
+    "player": (1015, 144, 12, 12),
+    "exit": (196, 14, 12, 12)
 }
 
-EXAMPLE_LEVEL =[
-    [2,1,1,1,1,1,1,1,1,1,2,1,2,1,2,1,1,1,1,1,1,1,1,1,2,1,1,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,2,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,2,2,2,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,2,0,2,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,2,0,2,2,2,2,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,2,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,2,2,2,2,2,2,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [2,1,1,1,1,1,1,1,1,1,2,1,1,1,2,1,1,1,1,1,1,1,1,1,2,1,1,1],
-]
 
-WORLD_HEIGH = len(EXAMPLE_LEVEL)
-WORLD_WIDTH = len(EXAMPLE_LEVEL[0])
+
+WORLD_HEIGH = 100
+WORLD_WIDTH = 100
 
 def tex_to_sprite(tex):
     return arcade.Sprite(tex, DISPLAY_SCALE)
@@ -62,20 +48,25 @@ class Rogue(arcade.Window):
         self.player_sprites = arcade.SpriteList()
         self.player_x = random.randint(1,WORLD_WIDTH-2)
         self.player_y = random.randint(1,WORLD_HEIGH-2)
+        self.exit_x = random.randint(1,WORLD_WIDTH-2)
+        self.exit_y = random.randint(1,WORLD_HEIGH-2)
         self.player_tex = self.get_texture("player")
-        self.moving_up = False
-        self.moving_down = False
-        self.moving_left = False
-        self.moving_right = False
-        self.frames_to_move = 8
-        self.move_frame = 0
+        self.gamewin = False
         self.setup_level()
+        while self.level_int [self.player_y] [self.player_x] != 0:
+            self.player_x = random.randint(1,WORLD_WIDTH-2)
+            self.player_y = random.randint(1,WORLD_HEIGH-2)
+        while self.level_int [self.exit_y] [self.exit_x] != 0:
+            self.exit_x = random.randint(1,WORLD_WIDTH-2)
+            self.exit_y = random.randint(1,WORLD_HEIGH-2)
+
 
     def setup_level(self):
-        self.level_int = EXAMPLE_LEVEL
+        self.level_int = generate_level(WORLD_WIDTH,WORLD_HEIGH, target_area=500)
         self.wall_tex = self.get_texture("stone1")
         self.other_wall_tex = self.get_texture("stonecorner1")
-
+        self.exit_tex = self.get_texture("exit")
+        
     def get_texture(self, name: str) -> arcade.Sprite:
         x, y, w, h = SPRITES_COORDS[name]
         return self.sheet.get_texture(arcade.LBWH(x, y, w, h)) 
@@ -90,6 +81,12 @@ class Rogue(arcade.Window):
 
 
         self.map_sprites.clear()
+        #draw exit
+        exit_sprite = tex_to_sprite(self.exit_tex)
+        exit_sprite.center_x = (self.exit_x - self.player_x) * TILE_SIZE + SCREEN_WIDTH // 2
+        exit_sprite.center_y = (self.exit_y - self.player_y) * TILE_SIZE + SCREEN_HEIGHT // 2
+        self.map_sprites.append(exit_sprite)
+        #draw map
         for map_y in range(WORLD_HEIGH):
             for map_x in range(WORLD_WIDTH):
                 if self.level_int[map_y][map_x] != 0:
@@ -112,54 +109,28 @@ class Rogue(arcade.Window):
 
     def on_update(self, delta_time):
         """ Movement and game logic """
-        if not (self.moving_left or self.moving_right or self.moving_up or self.moving_down):
-            return
-        else:
-            self.move_frame += 1
-            if self.move_frame != self.frames_to_move:
-                return
-            else:
-                self.move_frame = 0
+        if self.player_x == self.exit_x and self.player_y == self.exit_y:
+            self.gamewin = True
+        if self.gamewin:
+            print("win")
 
-        new_x = self.player_x
-        new_y = self.player_y
-        if self.moving_up:
-           new_y += 1 
-        elif self.moving_down:
-           new_y -= 1 
-        elif self.moving_left:
-           new_x -= 1 
-        elif self.moving_right:
-           new_x += 1 
-        # inside the map
-        if new_x < WORLD_WIDTH and new_y < WORLD_WIDTH and new_x >= 0 and new_y >= 0:
-            # not setpping into a wall
-            if self.level_int[new_y][new_x] == 0:
-                self.player_x = new_x
-                self.player_y = new_y
 
 
     def on_key_press(self, symbol, modifiers):
         """Called whenever a key is pressed."""
+        newx = self.player_x
+        newy = self.player_y
         if symbol == arcade.key.A:
-            self.moving_left = True
+            newx = self.player_x-1
         elif symbol == arcade.key.D:
-            self.moving_right = True
+            newx = self.player_x+1
         elif symbol == arcade.key.S:
-            self.moving_down = True
+            newy = self.player_y-1
         elif symbol == arcade.key.W:
-            self.moving_up = True
-        
-    def on_key_release(self, symbol, modifiers):
-        if symbol == arcade.key.A:
-            self.moving_left = False
-        elif symbol == arcade.key.D:
-            self.moving_right = False
-        elif symbol == arcade.key.S:
-            self.moving_down = False
-        elif symbol == arcade.key.W:
-            self.moving_up = False
-        
+            newy = self.player_y+1
+        if self.level_int [newy] [newx] == 0:
+            self.player_x = newx
+            self.player_y = newy  
 
 def main():
     """ Main method"""
