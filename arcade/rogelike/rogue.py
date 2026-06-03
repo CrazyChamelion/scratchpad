@@ -28,6 +28,25 @@ SPRITES_COORDS: dict[str, tuple[int, int, int, int]] = {
     "exit": (196, 14, 12, 12)
 }
 
+class enemy():
+    def __init__(self, health, damage, ai,sprite,x,y):
+        self.health = health 
+        self.damage = damage
+        self.ai = ai
+        self.sprite = sprite 
+        self.x = x
+        self.y = y
+    def pos(self):
+        return (self.x) , (self.y)
+    def stats(self):
+        return (self.health) , (self.damage)
+    def ai(self):
+        return str(self.ai)
+    def sprite(self):
+        return str(self.sprite)
+enemies = [enemy(1,2,"ranged","goblin",1,2), enemy(2,1,"mele","skeleton",1,1), enemy(1,3,"flanker","ork",2,1)]
+for a in enemies:
+    print (a.pos() , a.stats(), a.ai(), a.sprite() )
 
 
 WORLD_HEIGH = 100
