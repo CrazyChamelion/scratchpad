@@ -36,17 +36,17 @@ class enemy():
         self.sprite = sprite 
         self.x = x
         self.y = y
-    def pos(self):
+    def get_pos(self):
         return (self.x) , (self.y)
     def stats(self):
         return (self.health) , (self.damage)
-    def ai(self):
+    def get_ai(self):
         return str(self.ai)
-    def sprite(self):
+    def get_sprite(self):
         return str(self.sprite)
 enemies = [enemy(1,2,"ranged","goblin",1,2), enemy(2,1,"mele","skeleton",1,1), enemy(1,3,"flanker","ork",2,1)]
 for a in enemies:
-    print (a.pos() , a.stats(), a.ai(), a.sprite() )
+    print (a.get_pos() , a.stats(), a.get_ai(), a.get_sprite() )
 
 
 WORLD_HEIGH = 100
