@@ -67,8 +67,8 @@ class Ant:
     def draw(self, scale):
         r = scale / 2
         p = Vector(
-            self.p.x * scale + SCREEN_CENTER_X - r,
-            self.p.y * scale + SCREEN_CENTER_Y - r,
+            self.p.x * scale + SCREEN_CENTER_X,
+            self.p.y * scale + SCREEN_CENTER_Y,
         )
         arcade.draw_circle_filled(p.x, p.y, r, arcade.color.RED)
         end = Vector(p.x, p.y)
@@ -142,8 +142,6 @@ class Game(arcade.Window):
         points = []
         for i in range(self.cols + 1):
             x = (i - self.cols / 2) * self.zoom + SCREEN_CENTER_X
-            print(x)
-            exit(1)
             points.append((x, bottom_y))
             points.append((x, top_y))
         self.vertical_grid_lines.append(
