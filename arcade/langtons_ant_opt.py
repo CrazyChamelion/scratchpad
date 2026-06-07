@@ -117,22 +117,51 @@ class Game(arcade.Window):
     def __init__(self):
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
         arcade.set_background_color(arcade.color.WHITE)
-        self.rows = 46
-        self.cols = 62
+        self.rows = 70
+        self.cols = 70
         self.zoom = 20
-        self.turns_per_frame = 1
+        self.turns_per_frame = 10
         self.go_on_update = False
         self.squares = []
         self.generate_grid_lines()
-        # for j in range(self.rows):
-        #    y = j - self.rows // 2
-        #    row = []
-        #    for i in range(self.cols):
-        #        x = i - self.cols // 2
-        #        row.append(Square(Vector(x, y), Color.WHITE))
-        #    self.squares.append(row)
+        for j in range(self.rows):
+            y = j - self.rows // 2
+            row = []
+            for i in range(self.cols):
+                x = i - self.cols // 2
+                row.append(Square(Vector(x, y), Color.WHITE))
+            self.squares.append(row)
+
+        # shape list seemst to have a maximum size on my system and screws up when I go past it
+        # self.black_squares = arcade.shape_list.ShapeElementList()
+        self.black_squares = arcade.SpriteList()
         self.ant = Ant(Vector(0.5, 0.5), Direction.UP)
         self.running = True
+
+    def generate_black_squares(self):
+        # self.black_squares = arcade.shape_list.ShapeElementList()
+        self.black_squares.clear()
+        for j in range(self.rows):
+            y = (j - self.rows / 2) * self.zoom + SCREEN_CENTER_Y + self.zoom / 2
+            for i in range(self.cols):
+                if self.squares[j][i].color == Color.BLACK:
+                    x = (
+                        (i - self.cols / 2) * self.zoom
+                        + SCREEN_CENTER_X
+                        + self.zoom / 2
+                    )
+                    # using ShapeElementList and geometry has a bug
+                    # square = arcade.shape_list.create_rectangle_filled(
+                    #    center_x=x,
+                    #    center_y=y,
+                    #    width=self.zoom,
+                    #    height=self.zoom,
+                    #    color=arcade.color.BLACK,
+                    # )
+                    square = arcade.SpriteSolidColor(
+                        self.zoom, self.zoom, x, y, arcade.color.BLACK
+                    )
+                    self.black_squares.append(square)
 
     def generate_grid_lines(self):
         # vertical lines
@@ -169,6 +198,7 @@ class Game(arcade.Window):
         #        self.squares[j][i].draw(self.zoom)
         self.vertical_grid_lines.draw()
         self.horizontal_grid_lines.draw()
+        self.black_squares.draw()
         self.ant.draw(self.zoom)
 
     def on_update(self, delta_time):
@@ -179,6 +209,7 @@ class Game(arcade.Window):
                 for i in range(self.turns_per_frame):
                     if self.running:
                         self.take_turn()
+                self.generate_black_squares()
 
     def get_square_with_ant(self):
         x = int(self.ant.p.x - 0.5)
@@ -212,6 +243,7 @@ class Game(arcade.Window):
             self.go_on_update = not self.go_on_update
         if key == arcade.key.SPACE:
             self.take_turn()
+            self.generate_black_squares()
         if key == arcade.key.ESCAPE:
             self.close()
 
@@ -220,6 +252,7 @@ class Game(arcade.Window):
         if self.zoom < 3:
             self.zoom = 3
         self.generate_grid_lines()
+        self.generate_black_squares()
 
 
 def main():
