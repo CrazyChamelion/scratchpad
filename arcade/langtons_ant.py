@@ -140,7 +140,10 @@ class Game(arcade.Window):
     def on_update(self, delta_time):
         """Handles game logic and movement."""
         if self.running:
-            self.take_turn()
+            # 10 turns per frame
+            for i in range(100):
+                if self.running:
+                    self.take_turn()
 
     def get_square_with_ant(self):
         x = int(self.ant.p.x - 0.5)
