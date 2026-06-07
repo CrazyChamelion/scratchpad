@@ -142,6 +142,8 @@ class Game(arcade.Window):
         points = []
         for i in range(self.cols + 1):
             x = (i - self.cols / 2) * self.zoom + SCREEN_CENTER_X
+            print(x)
+            exit(1)
             points.append((x, bottom_y))
             points.append((x, top_y))
         self.vertical_grid_lines.append(
