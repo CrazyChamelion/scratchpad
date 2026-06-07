@@ -117,16 +117,16 @@ class Game(arcade.Window):
     def __init__(self):
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
         arcade.set_background_color(arcade.color.BLUE)
-        self.rows = 70
-        self.cols = 46
+        self.rows = 46
+        self.cols = 62
         self.zoom = 20
         self.squares = []
 
-        for j in range(self.cols):
-            y = j - self.cols // 2
+        for j in range(self.rows):
+            y = j - self.rows // 2
             row = []
-            for i in range(self.rows):
-                x = i - self.rows // 2
+            for i in range(self.cols):
+                x = i - self.cols // 2
                 row.append(Square(Vector(x, y), Color.WHITE))
             self.squares.append(row)
         self.ant = Ant(Vector(0.5, 0.5), Direction.UP)
@@ -135,8 +135,8 @@ class Game(arcade.Window):
     def on_draw(self):
         """Renders the screen (called 60 times/sec)."""
         self.clear()
-        for j in range(self.cols):
-            for i in range(self.rows):
+        for j in range(self.rows):
+            for i in range(self.cols):
                 self.squares[j][i].draw(self.zoom)
         self.ant.draw(self.zoom)
 
@@ -150,10 +150,10 @@ class Game(arcade.Window):
 
     def get_square_with_ant(self):
         x = int(self.ant.p.x - 0.5)
-        i = int(x + self.rows / 2)
+        i = int(x + self.cols / 2)
         y = int(self.ant.p.y - 0.5)
-        j = int(y + self.cols / 2)
-        if (i < 0 or i >= self.rows) or (j < 0 or j >= self.cols):
+        j = int(y + self.rows / 2)
+        if (i < 0 or i >= self.cols) or (j < 0 or j >= self.rows):
             self.running = False
             return None
         return self.squares[j][i]
