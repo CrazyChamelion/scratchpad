@@ -8,20 +8,23 @@ SCREEN_CENTER_X = SCREEN_WIDTH // 2
 SCREEN_CENTER_Y = SCREEN_HEIGHT // 2
 SCREEN_TITLE = "Arcade Starter Template"
 
+
 class Vector:
     def __init__(self, x, y):
         self.x = x
         self.y = y
 
+
 class Color(Enum):
     WHITE = 1
     BLACK = 2
+
 
 class Square:
     def __init__(self, ll, color):
         self.ll = ll
         self.color = color
-    
+
     def flip(self):
         if self.color == Color.BLACK:
             self.color = Color.WHITE
@@ -40,9 +43,11 @@ class Square:
         color = arcade.color.BLACK
         if self.color == Color.WHITE:
             color = arcade.color.WHITE
-        ll = Vector(self.ll.x * scale + SCREEN_CENTER_X, self.ll.y * scale + SCREEN_CENTER_Y) 
-        arcade.draw_rect_filled(arcade.rect.XYWH(ll.x, ll.y, scale, scale), color)
-        arcade.draw_rect_outline(arcade.rect.XYWH(ll.x, ll.y, scale, scale), arcade.color.BLUE)
+        ll = Vector(
+            self.ll.x * scale + SCREEN_CENTER_X, self.ll.y * scale + SCREEN_CENTER_Y
+        )
+        arcade.draw_rect_filled(arcade.rect.XYWH(ll.x + 1, ll.y + 1, scale - 2, scale - 2), color)
+
 
 class Direction(Enum):
     RIGHT = 1
@@ -50,14 +55,18 @@ class Direction(Enum):
     LEFT = 3
     DOWN = 4
 
+
 class Ant:
     def __init__(self, p, dir):
         self.p = p
         self.dir = dir
-    
+
     def draw(self, scale):
         r = scale / 2
-        p = Vector(self.p.x * scale + SCREEN_CENTER_X - r, self.p.y*scale+SCREEN_CENTER_Y - r) 
+        p = Vector(
+            self.p.x * scale + SCREEN_CENTER_X - r,
+            self.p.y * scale + SCREEN_CENTER_Y - r,
+        )
         arcade.draw_circle_filled(p.x, p.y, r, arcade.color.RED)
         end = Vector(p.x, p.y)
         if self.dir == Direction.RIGHT:
@@ -89,7 +98,7 @@ class Ant:
             self.dir = Direction.DOWN
         elif self.dir == Direction.DOWN:
             self.dir = Direction.RIGHT
-    
+
     def move(self):
         if self.dir == Direction.RIGHT:
             self.p.x += 1
@@ -105,49 +114,59 @@ class Game(arcade.Window):
     def __init__(self):
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
         arcade.set_background_color(arcade.color.BLUE)
+        self.rows = 110
+        self.cols = 110
         self.zoom = 5
         self.squares = []
 
-        for x in range(-50, 60):
-            for y in range(-50, 60):
-                self.squares.append(Square(Vector(x,y), Color.WHITE))
+        for j in range(self.cols):
+            y = j - self.cols // 2
+            row = []
+            for i in range(self.rows):
+                x = i - self.rows // 2
+                row.append(Square(Vector(x, y), Color.WHITE))
+            self.squares.append(row)
         self.ant = Ant(Vector(0.5, 0.5), Direction.UP)
         self.running = True
 
     def on_draw(self):
         """Renders the screen (called 60 times/sec)."""
         self.clear()
-        for s in self.squares:
-            s.draw(self.zoom)
+        for j in range(self.cols):
+            for i in range(self.rows):
+                self.squares[j][i].draw(self.zoom)
         self.ant.draw(self.zoom)
-        
 
     def on_update(self, delta_time):
         """Handles game logic and movement."""
         if self.running:
             self.take_turn()
 
+    def get_square_with_ant(self):
+        x = int(self.ant.p.x - 0.5)
+        i = int(x + self.rows / 2)
+        y = int(self.ant.p.y - 0.5)
+        j = int(y + self.cols / 2)
+        if (i < 0 or i >= self.rows) or (j < 0 or j >= self.cols):
+            self.running = False
+            return None
+        return self.squares[j][i]
+
     def take_turn(self):
-        # if ant is on white square: 
+        # if ant is on white square:
         #   turn right, change square black, move forward
         # else:
-        #   turn left, change square white, move forward 
+        #   turn left, change square white, move forward
 
         # find what square we are on
-        found_square = False
-        for s in self.squares:
-            if s.point_is_in(self.ant.p):
-                if s.color == Color.WHITE:
-                    self.ant.turn_right()
-                else:
-                    self.ant.turn_left()
-                s.flip()
-                found_square = True
-                break
-        if not found_square:
-            self.running = False
-            return
-        self.ant.move()
+        s = self.get_square_with_ant()
+        if s:
+            if s.color == Color.WHITE:
+                self.ant.turn_right()
+            else:
+                self.ant.turn_left()
+            s.flip()
+            self.ant.move()
 
     def on_key_press(self, key, modifiers):
         """Handles user input."""
