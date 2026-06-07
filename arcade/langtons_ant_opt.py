@@ -4,7 +4,7 @@ import arcade
 
 # Constants for window size and title
 SCREEN_WIDTH = 3100
-SCREEN_HEIGHT = 2400
+SCREEN_HEIGHT = 2100
 SCREEN_CENTER_X = SCREEN_WIDTH // 2
 SCREEN_CENTER_Y = SCREEN_HEIGHT // 2
 SCREEN_TITLE = "Arcade Starter Template"
@@ -137,6 +137,7 @@ class Game(arcade.Window):
         self.black_squares = arcade.SpriteList()
         self.ant = Ant(Vector(0.5, 0.5), Direction.UP)
         self.running = True
+        self.turn_count = 0
 
     def generate_black_squares(self):
         # self.black_squares = arcade.shape_list.ShapeElementList()
@@ -200,6 +201,15 @@ class Game(arcade.Window):
         self.horizontal_grid_lines.draw()
         self.black_squares.draw()
         self.ant.draw(self.zoom)
+        arcade.draw_text(
+            f"Turns: {self.turn_count}",
+            SCREEN_WIDTH - 20,
+            SCREEN_HEIGHT - 20,
+            arcade.color.BLACK,
+            font_size=24,
+            anchor_x="right",
+            anchor_y="top",
+        )
 
     def on_update(self, delta_time):
         """Handles game logic and movement."""
@@ -236,6 +246,7 @@ class Game(arcade.Window):
                 self.ant.turn_left()
             s.flip()
             self.ant.move()
+            self.turn_count += 1
 
     def on_key_press(self, key, modifiers):
         """Handles user input."""
