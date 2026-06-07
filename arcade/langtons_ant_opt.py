@@ -120,6 +120,7 @@ class Game(arcade.Window):
         self.rows = 46
         self.cols = 62
         self.zoom = 20
+        self.go_on_update = False
         self.squares = []
 
         for j in range(self.rows):
@@ -142,11 +143,12 @@ class Game(arcade.Window):
 
     def on_update(self, delta_time):
         """Handles game logic and movement."""
-        if self.running:
-            # 10 turns per frame
-            for i in range(100):
-                if self.running:
-                    self.take_turn()
+        if self.go_on_update:
+            if self.running:
+                # 10 turns per frame
+                for i in range(1):
+                    if self.running:
+                        self.take_turn()
 
     def get_square_with_ant(self):
         x = int(self.ant.p.x - 0.5)
@@ -176,6 +178,8 @@ class Game(arcade.Window):
 
     def on_key_press(self, key, modifiers):
         """Handles user input."""
+        if key == arcade.key.ENTER:
+            self.go_on_update = not self.go_on_update
         if key == arcade.key.SPACE:
             self.take_turn()
         if key == arcade.key.ESCAPE:
