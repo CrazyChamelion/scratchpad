@@ -116,29 +116,59 @@ class Ant:
 class Game(arcade.Window):
     def __init__(self):
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
-        arcade.set_background_color(arcade.color.BLUE)
+        arcade.set_background_color(arcade.color.WHITE)
         self.rows = 46
         self.cols = 62
         self.zoom = 20
+        self.turns_per_frame = 1
         self.go_on_update = False
         self.squares = []
-
-        for j in range(self.rows):
-            y = j - self.rows // 2
-            row = []
-            for i in range(self.cols):
-                x = i - self.cols // 2
-                row.append(Square(Vector(x, y), Color.WHITE))
-            self.squares.append(row)
+        self.generate_grid_lines()
+        # for j in range(self.rows):
+        #    y = j - self.rows // 2
+        #    row = []
+        #    for i in range(self.cols):
+        #        x = i - self.cols // 2
+        #        row.append(Square(Vector(x, y), Color.WHITE))
+        #    self.squares.append(row)
         self.ant = Ant(Vector(0.5, 0.5), Direction.UP)
         self.running = True
+
+    def generate_grid_lines(self):
+        # vertical lines
+        self.vertical_grid_lines = arcade.shape_list.ShapeElementList()
+        bottom_y = 0
+        top_y = SCREEN_HEIGHT
+        points = []
+        for i in range(self.cols + 1):
+            x = (i - self.cols / 2) * self.zoom + SCREEN_CENTER_X
+            points.append((x, bottom_y))
+            points.append((x, top_y))
+        self.vertical_grid_lines.append(
+            arcade.shape_list.create_lines(points, arcade.color.BLUE)
+        )
+
+        # horizontal Lines
+        points.clear()
+        left_x = 0
+        right_x = SCREEN_WIDTH
+        self.horizontal_grid_lines = arcade.shape_list.ShapeElementList()
+        for j in range(self.rows + 1):
+            y = (j - self.rows / 2) * self.zoom + SCREEN_CENTER_Y
+            points.append((left_x, y))
+            points.append((right_x, y))
+        self.horizontal_grid_lines.append(
+            arcade.shape_list.create_lines(points, arcade.color.BLUE)
+        )
 
     def on_draw(self):
         """Renders the screen (called 60 times/sec)."""
         self.clear()
-        for j in range(self.rows):
-            for i in range(self.cols):
-                self.squares[j][i].draw(self.zoom)
+        # for j in range(self.rows):
+        #    for i in range(self.cols):
+        #        self.squares[j][i].draw(self.zoom)
+        self.vertical_grid_lines.draw()
+        self.horizontal_grid_lines.draw()
         self.ant.draw(self.zoom)
 
     def on_update(self, delta_time):
@@ -146,7 +176,7 @@ class Game(arcade.Window):
         if self.go_on_update:
             if self.running:
                 # 10 turns per frame
-                for i in range(1):
+                for i in range(self.turns_per_frame):
                     if self.running:
                         self.take_turn()
 
@@ -189,6 +219,7 @@ class Game(arcade.Window):
         self.zoom += scroll_y
         if self.zoom < 3:
             self.zoom = 3
+        self.generate_grid_lines()
 
 
 def main():
