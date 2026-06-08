@@ -143,7 +143,7 @@ class Game(arcade.Window):
         if self.go_on_update:
             if self.running:
                 # 10 turns per frame
-                for i in range(1):
+                for i in range(10):
                     if self.running:
                         self.take_turn()
 

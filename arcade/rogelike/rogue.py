@@ -17,37 +17,22 @@ TILE_SIZE = RAW_TILE_SIZE * DISPLAY_SCALE
 
 SPRITES_COORDS: dict[str, tuple[int, int, int, int]] = {
     "stone1": (1, 27, 12, 12),
-    "stone2": (14, 27, 12, 12),
     "stonecorner1": (66, 27, 12, 12),
-    "stonecorner2": (79, 27, 12, 12),
-    "stonecorner3": (92, 27, 12, 12),
-    "floor1": (1, 92, 12, 12),
-    "floor2": (14, 92, 12, 12),
-    "floor3": (27, 92, 12, 12),
-    "player": (1015, 144, 12, 12),
-    "exit": (196, 14, 12, 12)
+    "player": (1015, 183, 12, 12),
+    "exit": (196, 14, 12, 12),
+    "goblin": (1353, 53, 12, 12),
+    "skeleton": (1353, 131, 12, 12),
+    "troll": (1353, 118, 12, 12),
 }
 
 class enemy():
-    def __init__(self, health, damage, ai,sprite,x,y):
+    def __init__(self, health, damage, ai,texture,x,y):
         self.health = health 
         self.damage = damage
         self.ai = ai
-        self.sprite = sprite 
+        self.texture = texture
         self.x = x
         self.y = y
-    def get_pos(self):
-        return (self.x) , (self.y)
-    def stats(self):
-        return (self.health) , (self.damage)
-    def get_ai(self):
-        return str(self.ai)
-    def get_sprite(self):
-        return str(self.sprite)
-enemies = [enemy(1,2,"ranged","goblin",1,2), enemy(2,1,"mele","skeleton",1,1), enemy(1,3,"flanker","ork",2,1)]
-for a in enemies:
-    print (a.get_pos() , a.stats(), a.get_ai(), a.get_sprite() )
-
 
 WORLD_HEIGH = 100
 WORLD_WIDTH = 100
@@ -60,6 +45,7 @@ class Rogue(arcade.Window):
     Main application class.
     """
     def __init__(self):
+        self.noclip = False
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
         arcade.set_background_color(arcade.color.BLACK)
         self.sheet = arcade.load_spritesheet(SHEET_PATH)
@@ -79,12 +65,35 @@ class Rogue(arcade.Window):
             self.exit_x = random.randint(1,WORLD_WIDTH-2)
             self.exit_y = random.randint(1,WORLD_HEIGH-2)
 
+        self.enemies = []
+        for i in range (10):
+            x,y = self.valid_cord()
+            troll = enemy(1,3,"flanker",self.troll_tex,x,y)
+            self.enemies.append (troll)
+            x,y = self.valid_cord()
+            goblin = enemy(1,3,"flanker",self.goblin_tex,x,y)
+            self.enemies.append (goblin)
+            x,y = self.valid_cord()
+            skeleton = enemy(1,3,"flanker",self.skeleton_tex,x,y)
+            self.enemies.append (skeleton)        
+        
+        
+    def valid_cord(self):
+        x = random.randint(1,WORLD_WIDTH-2)
+        y = random.randint(1,WORLD_HEIGH-2)
+        while self.level_int [y] [x] != 0:
+            x = random.randint(1,WORLD_WIDTH-2)
+            y = random.randint(1,WORLD_HEIGH-2)
+        return x,y 
 
     def setup_level(self):
         self.level_int = generate_level(WORLD_WIDTH,WORLD_HEIGH, target_area=500)
         self.wall_tex = self.get_texture("stone1")
         self.other_wall_tex = self.get_texture("stonecorner1")
         self.exit_tex = self.get_texture("exit")
+        self.goblin_tex = self.get_texture("goblin")
+        self.skeleton_tex = self.get_texture("skeleton")
+        self.troll_tex = self.get_texture("troll")
         
     def get_texture(self, name: str) -> arcade.Sprite:
         x, y, w, h = SPRITES_COORDS[name]
@@ -97,7 +106,6 @@ class Rogue(arcade.Window):
         self.player_sprite.center_x = SCREEN_WIDTH // 2
         self.player_sprite.center_y = SCREEN_HEIGHT // 2
         self.player_sprites.append(self.player_sprite)
-
 
         self.map_sprites.clear()
         #draw exit
@@ -117,6 +125,14 @@ class Rogue(arcade.Window):
                     sprite.center_y = (map_y - self.player_y) * TILE_SIZE + SCREEN_HEIGHT // 2
                     self.map_sprites.append(sprite)
 
+        self.enemysprite = arcade.SpriteList ()
+        for e in self.enemies:
+            enemy = tex_to_sprite(e.texture)
+            enemy.center_x = (e.x - self.player_x) * TILE_SIZE + SCREEN_WIDTH // 2
+            enemy.center_y = (e.y - self.player_y) * TILE_SIZE + SCREEN_HEIGHT // 2
+            self.enemysprite.append(enemy)
+            
+            
     def on_draw(self):
         """ Render the screen. """
         self.clear()
@@ -124,7 +140,7 @@ class Rogue(arcade.Window):
         self.draw_player_centric()
         self.map_sprites.draw()
         self.player_sprites.draw()
-        
+        self.enemysprite.draw()
 
     def on_update(self, delta_time):
         """ Movement and game logic """
@@ -147,9 +163,14 @@ class Rogue(arcade.Window):
             newy = self.player_y-1
         elif symbol == arcade.key.W:
             newy = self.player_y+1
-        if self.level_int [newy] [newx] == 0:
+
+        if self.level_int [newy] [newx] == 0 or self.noclip:
             self.player_x = newx
-            self.player_y = newy  
+            self.player_y = newy 
+        if symbol == arcade.key.F:
+            self.noclip = not self.noclip
+
+        
 
 def main():
     """ Main method"""
