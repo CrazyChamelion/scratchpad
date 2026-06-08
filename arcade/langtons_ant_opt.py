@@ -4,7 +4,7 @@ import arcade
 
 # Constants for window size and title
 SCREEN_WIDTH = 3100
-SCREEN_HEIGHT = 2400
+SCREEN_HEIGHT = 2100
 SCREEN_CENTER_X = SCREEN_WIDTH // 2
 SCREEN_CENTER_Y = SCREEN_HEIGHT // 2
 SCREEN_TITLE = "Arcade Starter Template"
@@ -67,8 +67,8 @@ class Ant:
     def draw(self, scale):
         r = scale / 2
         p = Vector(
-            self.p.x * scale + SCREEN_CENTER_X - r,
-            self.p.y * scale + SCREEN_CENTER_Y - r,
+            self.p.x * scale + SCREEN_CENTER_X,
+            self.p.y * scale + SCREEN_CENTER_Y,
         )
         arcade.draw_circle_filled(p.x, p.y, r, arcade.color.RED)
         end = Vector(p.x, p.y)
@@ -116,13 +116,14 @@ class Ant:
 class Game(arcade.Window):
     def __init__(self):
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
-        arcade.set_background_color(arcade.color.BLUE)
-        self.rows = 46
-        self.cols = 62
+        arcade.set_background_color(arcade.color.WHITE)
+        self.rows = 70
+        self.cols = 70
         self.zoom = 20
+        self.turns_per_frame = 10
         self.go_on_update = False
         self.squares = []
-
+        self.generate_grid_lines()
         for j in range(self.rows):
             y = j - self.rows // 2
             row = []
@@ -130,25 +131,95 @@ class Game(arcade.Window):
                 x = i - self.cols // 2
                 row.append(Square(Vector(x, y), Color.WHITE))
             self.squares.append(row)
+
+        # shape list seemst to have a maximum size on my system and screws up when I go past it
+        # self.black_squares = arcade.shape_list.ShapeElementList()
+        self.black_squares = arcade.SpriteList()
         self.ant = Ant(Vector(0.5, 0.5), Direction.UP)
         self.running = True
+        self.turn_count = 0
+
+    def generate_black_squares(self):
+        # self.black_squares = arcade.shape_list.ShapeElementList()
+        self.black_squares.clear()
+        for j in range(self.rows):
+            y = (j - self.rows / 2) * self.zoom + SCREEN_CENTER_Y + self.zoom / 2
+            for i in range(self.cols):
+                if self.squares[j][i].color == Color.BLACK:
+                    x = (
+                        (i - self.cols / 2) * self.zoom
+                        + SCREEN_CENTER_X
+                        + self.zoom / 2
+                    )
+                    # using ShapeElementList and geometry has a bug
+                    # square = arcade.shape_list.create_rectangle_filled(
+                    #    center_x=x,
+                    #    center_y=y,
+                    #    width=self.zoom,
+                    #    height=self.zoom,
+                    #    color=arcade.color.BLACK,
+                    # )
+                    square = arcade.SpriteSolidColor(
+                        self.zoom, self.zoom, x, y, arcade.color.BLACK
+                    )
+                    self.black_squares.append(square)
+
+    def generate_grid_lines(self):
+        # vertical lines
+        self.vertical_grid_lines = arcade.shape_list.ShapeElementList()
+        bottom_y = 0
+        top_y = SCREEN_HEIGHT
+        points = []
+        for i in range(self.cols + 1):
+            x = (i - self.cols / 2) * self.zoom + SCREEN_CENTER_X
+            points.append((x, bottom_y))
+            points.append((x, top_y))
+        self.vertical_grid_lines.append(
+            arcade.shape_list.create_lines(points, arcade.color.BLUE)
+        )
+
+        # horizontal Lines
+        points.clear()
+        left_x = 0
+        right_x = SCREEN_WIDTH
+        self.horizontal_grid_lines = arcade.shape_list.ShapeElementList()
+        for j in range(self.rows + 1):
+            y = (j - self.rows / 2) * self.zoom + SCREEN_CENTER_Y
+            points.append((left_x, y))
+            points.append((right_x, y))
+        self.horizontal_grid_lines.append(
+            arcade.shape_list.create_lines(points, arcade.color.BLUE)
+        )
 
     def on_draw(self):
         """Renders the screen (called 60 times/sec)."""
         self.clear()
-        for j in range(self.rows):
-            for i in range(self.cols):
-                self.squares[j][i].draw(self.zoom)
+        # for j in range(self.rows):
+        #    for i in range(self.cols):
+        #        self.squares[j][i].draw(self.zoom)
+        self.vertical_grid_lines.draw()
+        self.horizontal_grid_lines.draw()
+        self.black_squares.draw()
         self.ant.draw(self.zoom)
+        arcade.draw_text(
+            f"Turns: {self.turn_count}",
+            SCREEN_WIDTH - 20,
+            SCREEN_HEIGHT - 20,
+            arcade.color.BLACK,
+            font_size=24,
+            anchor_x="right",
+            anchor_y="top",
+        )
 
     def on_update(self, delta_time):
         """Handles game logic and movement."""
         if self.go_on_update:
             if self.running:
                 # 10 turns per frame
-                for i in range(1):
+                for i in range(self.turns_per_frame):
                     if self.running:
                         self.take_turn()
+                self.generate_black_squares()
 
     def get_square_with_ant(self):
         x = int(self.ant.p.x - 0.5)
@@ -175,6 +246,7 @@ class Game(arcade.Window):
                 self.ant.turn_left()
             s.flip()
             self.ant.move()
+            self.turn_count += 1
 
     def on_key_press(self, key, modifiers):
         """Handles user input."""
@@ -182,6 +254,7 @@ class Game(arcade.Window):
             self.go_on_update = not self.go_on_update
         if key == arcade.key.SPACE:
             self.take_turn()
+            self.generate_black_squares()
         if key == arcade.key.ESCAPE:
             self.close()
 
@@ -189,6 +262,8 @@ class Game(arcade.Window):
         self.zoom += scroll_y
         if self.zoom < 3:
             self.zoom = 3
+        self.generate_grid_lines()
+        self.generate_black_squares()
 
 
 def main():
