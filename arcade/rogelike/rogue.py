@@ -4,6 +4,7 @@ from enum import Enum
 import time 
 import random
 from level_gen import generate_level 
+from astar import astar_flood
 
 # Constants
 SCREEN_WIDTH = 1800
@@ -23,6 +24,7 @@ SPRITES_COORDS: dict[str, tuple[int, int, int, int]] = {
     "goblin": (1353, 53, 12, 12),
     "skeleton": (1353, 131, 12, 12),
     "troll": (1353, 118, 12, 12),
+    "sword" : (508, 79, 12, 12),
 }
 
 class enemy():
@@ -33,6 +35,42 @@ class enemy():
         self.texture = texture
         self.x = x
         self.y = y
+        self.speed = 2
+
+    def doai(self,astarmap):
+        currentpos = astarmap [self.y][self.x]
+        north = None
+        south = None
+        east = None
+        west = None
+        if self.y+self.speed < len(astarmap):
+            north =  astarmap [self.y+self.speed][self.x]
+        if self.y-self.speed > 0:
+            south = astarmap [self.y-self.speed][self.x]
+        if self.x+self.speed < len(astarmap[0]):
+            east = astarmap [self.y][self.x+self.speed]
+        if self.x-self.speed >0:
+            west = astarmap [self.y][self.x-self.speed]
+        bestdir = None
+        if north <= south and north <= west and north <= east:
+            bestdir = "n"
+        elif south <= north and south <= west and south <= east: 
+            bestdir = "s"
+        elif east <= south and east <= west and east <= north:
+            bestdir = "e"
+        else:
+            bestdir = "w"
+        if bestdir == "n":
+            self.y+=self.speed
+        if bestdir == "s":
+            self.y-=self.speed
+        if bestdir == "e":
+            self.x+=self.speed
+        if bestdir == "w":
+            self.x-=self.speed
+        print("im printing bestdir, north south east west,", bestdir , north , south , east , west)
+
+
 
 WORLD_HEIGH = 100
 WORLD_WIDTH = 100
@@ -76,7 +114,7 @@ class Rogue(arcade.Window):
             x,y = self.valid_cord()
             skeleton = enemy(1,3,"flanker",self.skeleton_tex,x,y)
             self.enemies.append (skeleton)        
-        
+      
         
     def valid_cord(self):
         x = random.randint(1,WORLD_WIDTH-2)
@@ -166,7 +204,10 @@ class Rogue(arcade.Window):
 
         if self.level_int [newy] [newx] == 0 or self.noclip:
             self.player_x = newx
-            self.player_y = newy 
+            self.player_y = newy
+            x = astar_flood(self.level_int,self.player_x,self.player_y,False) 
+            for a in self.enemies:
+                a.doai(x)
         if symbol == arcade.key.F:
             self.noclip = not self.noclip
 
