@@ -68,7 +68,7 @@ class enemy():
             self.x+=self.speed
         if bestdir == "w":
             self.x-=self.speed
-        print("im printing bestdir, north south east west,", bestdir , north , south , east , west)
+       
 
 
 
@@ -83,7 +83,9 @@ class Rogue(arcade.Window):
     Main application class.
     """
     def __init__(self):
+        self.attacking = False
         self.noclip = False
+        self.enemy_hit = False
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
         arcade.set_background_color(arcade.color.BLACK)
         self.sheet = arcade.load_spritesheet(SHEET_PATH)
@@ -132,7 +134,7 @@ class Rogue(arcade.Window):
         self.goblin_tex = self.get_texture("goblin")
         self.skeleton_tex = self.get_texture("skeleton")
         self.troll_tex = self.get_texture("troll")
-        
+        self.sword_tex = self.get_texture("sword")
     def get_texture(self, name: str) -> arcade.Sprite:
         x, y, w, h = SPRITES_COORDS[name]
         return self.sheet.get_texture(arcade.LBWH(x, y, w, h)) 
@@ -169,7 +171,14 @@ class Rogue(arcade.Window):
             enemy.center_x = (e.x - self.player_x) * TILE_SIZE + SCREEN_WIDTH // 2
             enemy.center_y = (e.y - self.player_y) * TILE_SIZE + SCREEN_HEIGHT // 2
             self.enemysprite.append(enemy)
-            
+        self.weaponsprite = arcade.SpriteList ()
+
+        if self.attacking:
+        
+            weapon_sprite = tex_to_sprite(self.sword_tex)
+            self.weaponsprite.append(weapon_sprite)
+            weapon_sprite.center_x = (self.weapon_x - self.player_x) * TILE_SIZE + SCREEN_WIDTH // 2
+            weapon_sprite.center_y = (self.weapon_y - self.player_y) * TILE_SIZE + SCREEN_HEIGHT // 2
             
     def on_draw(self):
         """ Render the screen. """
@@ -179,6 +188,7 @@ class Rogue(arcade.Window):
         self.map_sprites.draw()
         self.player_sprites.draw()
         self.enemysprite.draw()
+        self.weaponsprite.draw()
 
     def on_update(self, delta_time):
         """ Movement and game logic """
@@ -187,6 +197,22 @@ class Rogue(arcade.Window):
         if self.gamewin:
             print("win")
 
+    def player_attack (self,direction):
+        self.attacking = True
+        if direction == "up":
+            self.weapon_x = self.player_x
+            self.weapon_y = self.player_y+1
+        if direction == "down":
+            self.weapon_x = self.player_x
+            self.weapon_y = self.player_y-1
+        if direction == "left":
+            self.weapon_x = self.player_x-1
+            self.weapon_y = self.player_y
+        if direction == "right":
+            self.weapon_x = self.player_x+1
+            self.weapon_y = self.player_y
+        if self.level_int[self.weapon_y] [self.weapon_x] !=0:
+            self.attacking = False
 
 
     def on_key_press(self, symbol, modifiers):
@@ -202,16 +228,51 @@ class Rogue(arcade.Window):
         elif symbol == arcade.key.W:
             newy = self.player_y+1
 
+        #attacks 
+        if symbol == arcade.key.UP:
+            
+            x = astar_flood(self.level_int,self.player_x,self.player_y,False)
+            self.player_attack("up")
+            self.enenemy_attacked()
+            for a in self.enemies:
+                a.doai(x)
+                
+        if symbol == arcade.key.DOWN:
+            x = astar_flood(self.level_int,self.player_x,self.player_y,False)
+            self.player_attack("down")
+            self.enenemy_attacked()
+            for a in self.enemies:
+                a.doai(x)
+        if symbol == arcade.key.LEFT:
+            x = astar_flood(self.level_int,self.player_x,self.player_y,False)
+            self.player_attack("left")
+            self.enenemy_attacked()
+            for a in self.enemies:
+                a.doai(x)
+        if symbol == arcade.key.RIGHT:
+            x = astar_flood(self.level_int,self.player_x,self.player_y,False)
+            self.player_attack("right")
+            self.enenemy_attacked()
+            for a in self.enemies:
+                a.doai(x)
+
         if self.level_int [newy] [newx] == 0 or self.noclip:
             self.player_x = newx
             self.player_y = newy
             x = astar_flood(self.level_int,self.player_x,self.player_y,False) 
             for a in self.enemies:
                 a.doai(x)
+            
         if symbol == arcade.key.F:
             self.noclip = not self.noclip
 
-        
+    def enenemy_attacked(self):
+        to_remove = []
+        for a in self.enemies:
+            if a.x == self.weapon_x and a.y == self.weapon_y:
+                to_remove.append(a)
+        for a in to_remove:
+            self.enemies.remove(a)
 
 def main():
     """ Main method"""
