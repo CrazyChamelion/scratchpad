@@ -35,7 +35,7 @@ class enemy():
         self.texture = texture
         self.x = x
         self.y = y
-        self.speed = 2
+        self.speed = 1
 
     def doai(self,astarmap):
         currentpos = astarmap [self.y][self.x]
@@ -83,6 +83,8 @@ class Rogue(arcade.Window):
     Main application class.
     """
     def __init__(self):
+        self.health = 3 
+        self.loss = False
         self.attacking = False
         self.noclip = False
         self.enemy_hit = False
@@ -189,13 +191,38 @@ class Rogue(arcade.Window):
         self.player_sprites.draw()
         self.enemysprite.draw()
         self.weaponsprite.draw()
+        arcade.draw_text(
+            text= str(self.health),
+            x = SCREEN_WIDTH - 100,
+            y = SCREEN_HEIGHT - 100,
+            )
+        if self.gamewin:
+            arcade.draw_text(
+            text= "YOU WIN!!!!",
+            x = SCREEN_WIDTH /2,
+            y = SCREEN_HEIGHT /2,
+            color = arcade.color.NEON_FUCHSIA,
+            font_size= 100
+            )
+
 
     def on_update(self, delta_time):
         """ Movement and game logic """
         if self.player_x == self.exit_x and self.player_y == self.exit_y:
             self.gamewin = True
-        if self.gamewin:
-            print("win")
+        
+        if self.loss:
+            arcade.Window.close(self)
+            print("lose")
+        toremove = []
+        for a in self.enemies:
+                if a.x == self.player_x and a.y == self.player_y:
+                    toremove.append(a)
+                    self.health -=1
+        for a in toremove:
+            self.enemies.remove(a) 
+        if self.health <= 0:
+                self.loss = True
 
     def player_attack (self,direction):
         self.attacking = True
@@ -219,8 +246,10 @@ class Rogue(arcade.Window):
         """Called whenever a key is pressed."""
         newx = self.player_x
         newy = self.player_y
+        self.attacking = False
         if symbol == arcade.key.A:
             newx = self.player_x-1
+            
         elif symbol == arcade.key.D:
             newx = self.player_x+1
         elif symbol == arcade.key.S:
@@ -259,9 +288,12 @@ class Rogue(arcade.Window):
         if self.level_int [newy] [newx] == 0 or self.noclip:
             self.player_x = newx
             self.player_y = newy
+            
+
             x = astar_flood(self.level_int,self.player_x,self.player_y,False) 
             for a in self.enemies:
                 a.doai(x)
+                
             
         if symbol == arcade.key.F:
             self.noclip = not self.noclip
