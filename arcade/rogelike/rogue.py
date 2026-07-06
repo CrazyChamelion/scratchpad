@@ -86,6 +86,8 @@ class Rogue(arcade.Window):
         self.health = 3 
         self.loss = False
         self.attacking = False
+        self.weaponxlist = []
+        self.weaponylist = []
         self.noclip = False
         self.enemy_hit = False
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
@@ -176,12 +178,24 @@ class Rogue(arcade.Window):
         self.weaponsprite = arcade.SpriteList ()
 
         if self.attacking:
-        
-            weapon_sprite = tex_to_sprite(self.sword_tex)
-            self.weaponsprite.append(weapon_sprite)
-            weapon_sprite.center_x = (self.weapon_x - self.player_x) * TILE_SIZE + SCREEN_WIDTH // 2
-            weapon_sprite.center_y = (self.weapon_y - self.player_y) * TILE_SIZE + SCREEN_HEIGHT // 2
+            dx = self.weapon_x - self.player_x
+            dy = self.weapon_y - self.player_y
+            if abs(dx) > 0:
+                dx = dx/abs(dx)
+            if abs(dy) > 0:
+                dy = dy/abs(dy)
+            x = 0
+            y = 0
+            for i in range (3):
+                x+=dx 
+                y+=dy 
+                weapon_sprite = tex_to_sprite(self.sword_tex)
+                self.weaponsprite.append(weapon_sprite)
+                weapon_sprite.center_x = (x) * TILE_SIZE + SCREEN_WIDTH // 2
+                weapon_sprite.center_y = (y) * TILE_SIZE + SCREEN_HEIGHT // 2
+
             
+                        
     def on_draw(self):
         """ Render the screen. """
         self.clear()
@@ -228,18 +242,26 @@ class Rogue(arcade.Window):
         self.attacking = True
         if direction == "up":
             self.weapon_x = self.player_x
-            self.weapon_y = self.player_y+1
+            self.weapon_y = self.player_y+3
+            self.weaponxlist = [self.player_x, self.player_x, self.player_x]
+            self.weaponylist = [self.player_y + 1, self.player_y + 2, self.player_y+3]
         if direction == "down":
             self.weapon_x = self.player_x
-            self.weapon_y = self.player_y-1
+            self.weapon_y = self.player_y-3
+            self.weaponxlist = [self.player_x, self.player_x, self.player_x]
+            self.weaponylist = [self.player_y - 1, self.player_y - 2, self.player_y-3]
+            
         if direction == "left":
-            self.weapon_x = self.player_x-1
+            self.weapon_x = self.player_x-3
             self.weapon_y = self.player_y
+            self.weaponxlist = [self.player_x-1, self.player_x-2, self.player_x-3]
+            self.weaponylist = [self.player_y, self.player_y, self.player_y]
         if direction == "right":
-            self.weapon_x = self.player_x+1
+            self.weapon_x = self.player_x+3
             self.weapon_y = self.player_y
-        if self.level_int[self.weapon_y] [self.weapon_x] !=0:
-            self.attacking = False
+            self.weaponxlist = [self.player_x+1, self.player_x+2, self.player_x+3]
+            self.weaponylist = [self.player_y, self.player_y, self.player_y]
+       
 
 
     def on_key_press(self, symbol, modifiers):
@@ -300,11 +322,15 @@ class Rogue(arcade.Window):
 
     def enenemy_attacked(self):
         to_remove = []
-        for a in self.enemies:
-            if a.x == self.weapon_x and a.y == self.weapon_y:
-                to_remove.append(a)
-        for a in to_remove:
-            self.enemies.remove(a)
+        if len(self.weaponxlist) > 0:
+            for i in range (len(self.weaponxlist)):
+                weapon_x = self.weaponxlist[i]
+                weapon_y = self.weaponylist[1]
+                for a in self.enemies:
+                    if a.x == weapon_x and a.y == weapon_y:
+                        to_remove.append(a)
+            for a in to_remove:
+                self.enemies.remove(a)
 
 def main():
     """ Main method"""
